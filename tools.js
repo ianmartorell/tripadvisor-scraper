@@ -75,7 +75,6 @@ async function getLocationId(searchString) {
 async function getPlacePrices(placeId) {
     const date = new Date();
     const dateString = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-    console.log(dateString, "DATUMOS");
     let response = await axios.get(`https://api.tripadvisor.com/api/internal/1.19/en/meta_hac/${placeId}?adults=2&checkin=2019-02-12&currency=USD&lod=extended&nights=1`, {headers: {"X-TripAdvisor-API-Key": API_KEY}})
     let offers = response.data.data[0].hac_offers;
     const isLoaded = offers && offers.availability && offers.availability !== "pending";
@@ -104,7 +103,6 @@ function getHotelIds($) {
         const placeId = el.attr("data-locationid");
         const url = el.attr("data-url");
         const dataIndex = el.attr("data-index");
-        console.log(dataIndex, url, placeId, "ELEMENT");
         hotelIds.push(placeId);
     });
     return hotelIds
@@ -116,7 +114,7 @@ const processReview = (review, remoteId) => {
     let userLocation = null;
     let userContributions = null;
 
-    log.info(`Processing review: ${title}`);
+    log.debug(`Processing review: ${title}`);
     if (userProfile) {
         const {hometown, contributionCounts} = userProfile;
         const {sumReview} = contributionCounts;
@@ -241,6 +239,21 @@ function getRestaurantIds($) {
     });
     return ids
 }
+function getHours(placeInfo){
+    const placeHolder = [];
+
+    if (!placeInfo.hours) {
+        return placeHolder;
+    }
+
+    if(!placeInfo.hours.week_ranges){
+        return placeHolder;
+    }
+
+    return placeInfo.hours.week_ranges.map(wR => wR.map(day => ({open: day.open_time, close: day.close_time})));
+
+}
+
 
 async function processRestaurant(id, client, dataset) {
     const placeInfo = await getPlaceInformation(id);
@@ -259,10 +272,9 @@ async function processRestaurant(id, client, dataset) {
         address: placeInfo.address,
         cuisine: placeInfo.cuisine.map(cuisine => cuisine.name),
         mealTypes: placeInfo.mealTypes && placeInfo.mealTypes.map(m => m.name),
-        hours: placeInfo.hours.week_ranges && placeInfo.hours.week_ranges.map(wR => wR.map(day => ({open: day.open_time, close: day.close_time}))),
+        hours: getHours(placeInfo),
         reviews
     };
-    console.log(place, "PLACE");
     await dataset.pushData(place);
 
 }
