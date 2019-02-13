@@ -110,8 +110,6 @@ function getHotelIds($) {
     divs.each((index, element) => {
         const el = $(element).find(".meta_listing");
         const placeId = el.attr("data-locationid");
-        const url = el.attr("data-url");
-        const dataIndex = el.attr("data-index");
         hotelIds.push(placeId);
     });
     return hotelIds
@@ -233,7 +231,7 @@ async function getPlaceInfoAndReview(id, client) {
     return {placeInfo, reviews}
 }
 
-async function processHotels(id, client, dataset) {
+async function processHotel(id, client, dataset) {
     let placePrices;
     const {reviews, placeInfo} = await getPlaceInfoAndReview(id, client);
     try {
@@ -267,7 +265,11 @@ async function processHotels(id, client, dataset) {
         prices,
         reviews
     };
-    await dataset.pushData(place);
+    if(dataset) {
+        await dataset.pushData(place);
+    }else{
+        await Apify.setValue('OUTPUT', JSON.stringify(place), { contentType: 'application/json' })
+    }
 }
 
 function buildRestaurantUrl(locationId, offset) {
@@ -316,8 +318,8 @@ function getHours(placeInfo) {
 }
 
 
-async function processRestaurant(id, client, dataset, input) {
-    const {reviews, placeInfo} = await getPlaceInfoAndReview(id, client, input);
+async function processRestaurant(id, client, dataset) {
+    const {reviews, placeInfo} = await getPlaceInfoAndReview(id, client);
     if (!placeInfo) {
         return;
     }
@@ -338,7 +340,12 @@ async function processRestaurant(id, client, dataset, input) {
         hours: getHours(placeInfo),
         reviews
     };
-    await dataset.pushData(place);
+
+    if(dataset) {
+        await dataset.pushData(place);
+    }else{
+        await Apify.setValue('OUTPUT', JSON.stringify(place), { contentType: 'application/json' })
+    }
 
 }
 
@@ -359,7 +366,7 @@ module.exports = {
     getHotelIds,
     getLocationId,
     buildHotelUrl,
-    processHotels,
+    processHotel,
     getRequestListSources,
     buildRestaurantUrl,
     getRestaurantIds,

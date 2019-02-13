@@ -5,7 +5,7 @@ const {
     getLocationId,
     buildHotelUrl,
     resolveInBatches,
-    processHotels,
+    processHotel,
     getRequestListSources,
     buildRestaurantUrl,
     getRestaurantIds,
@@ -20,19 +20,37 @@ const {utils: {log}} = Apify;
 Apify.main(async () => {
     // Create and initialize an instance of the RequestList class that contains the start URL.
     const input = await Apify.getValue("INPUT");
-    const {locationFullName, placeTypes, includeReviews, lastReviewDate} = input; //TODO: COMMENT IN README HOW THE LOCATION STRING SHOULD LOOK LIKE
+    const {locationFullName, placeTypes, includeReviews, lastReviewDate, hotelId, restaurantId} = input; //TODO: COMMENT IN README HOW THE LOCATION STRING SHOULD LOOK LIKE
     global.INCLUDE_REVIEWS = includeReviews;
     global.LAST_REVIEW_DATE = lastReviewDate;
     const timeStamp = Date.now();
-    const restaurants = await Apify.openDataset(`restaurants-${timeStamp}`);
-    const hotels = await Apify.openDataset(`hotels-${timeStamp}`);
-    const locationId = await getLocationId(locationFullName); //@TODO: ERROR could not obtain location id from search string;
-    console.log(locationId, "LOCATIONID");
-    const requestList = new Apify.RequestList({
-        sources: getRequestListSources(locationId, placeTypes)
-    });
-    await requestList.initialize();
+    let requestList;
+    let restaurants;
+    let hotels;
+    let locationId;
+    if (locationFullName) {
+        restaurants = await Apify.openDataset(`restaurants-${timeStamp}`);
+        hotels = await Apify.openDataset(`hotels-${timeStamp}`);
+        locationId = await getLocationId(locationFullName); //@TODO: ERROR could not obtain location id from search string;
+        console.log(locationId, "LOCATIONID");
+        requestList = new Apify.RequestList({
+            sources: getRequestListSources(locationId, placeTypes)
+        });
+    }
 
+    if (restaurantId) {
+        requestList = new Apify.RequestList({
+            sources: [{url: "https://www.tripadvisor.com", userData: {restaurantId, restaurantDetail: true}}]
+        });
+    }
+
+    if (hotelId) {
+        requestList = new Apify.RequestList({
+            sources: [{url: "https://www.tripadvisor.com", userData: {hotelId, hotelDetail: true}}]
+        });
+    }
+
+    await requestList.initialize();
     const requestQueue = await Apify.openRequestQueue();
 
 
@@ -60,7 +78,7 @@ Apify.main(async () => {
                     client = await getClient();
                     console.log("PROCESSING HOTEL LIST ", request.url);
                     const hotelIds = getHotelIds($);
-                    await resolveInBatches(hotelIds.map(id => processHotels(id, client, hotels)))
+                    await resolveInBatches(hotelIds.map(id => processHotel(id, client, hotels)))
                 }
 
                 catch (e) {
@@ -78,9 +96,14 @@ Apify.main(async () => {
                 }
                 await resolveInBatches(promises);
             } else if (request.userData.restaurantList) {
-                client = await getClient();
                 const restaurantIds = getRestaurantIds($);
                 await resolveInBatches(restaurantIds.map(id => processRestaurant(id, client, restaurants)))
+            } else if (request.userData.restaurantDetail) {
+                client = await getClient();
+                await processRestaurant(request.userData.restaurantId, client);
+            }else if (request.userData.hotelDetail) {
+                client = await getClient();
+                await processHotel(request.userData.hotelId, client);
             }
 
         },
