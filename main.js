@@ -10,7 +10,8 @@ const {
     buildRestaurantUrl,
     getRestaurantIds,
     processRestaurant,
-    getClient
+    getClient,
+    radnomDelay
 } = require("./tools");
 
 const {utils: {log}} = Apify;
@@ -50,7 +51,7 @@ Apify.main(async () => {
                         url: buildHotelUrl(locationId, i.toString()),
                         userData: {hotelList: true}
                     }));
-                    await Apify.utils.sleep(300);
+                    await radnomDelay();
                 }
                 await resolveInBatches(promises);
             } else if (request.userData.hotelList) {
@@ -73,7 +74,7 @@ Apify.main(async () => {
                         url: buildRestaurantUrl(locationId, i.toString()),
                         userData: {restaurantList: true}
                     }));
-                    await Apify.utils.sleep(300);
+                    await radnomDelay();
                 }
                 await resolveInBatches(promises);
             } else if (request.userData.restaurantList) {

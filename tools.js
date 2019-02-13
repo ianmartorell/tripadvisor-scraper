@@ -1,10 +1,16 @@
 const axios = require("axios");
 const Apify = require('apify');
 const cheerio = require("cheerio");
-const moment =require("moment");
+const moment = require("moment");
 const {utils: {log}} = Apify;
 const {ReviewQuery} = require("./graphql-queries");
 const API_KEY = "3c7beec8-846d-4377-be03-71cae6145fdc";
+
+function radnomDelay(minimum = 200, maximum = 600) {
+    const min = Math.ceil(minimum);
+    const max = Math.floor(maximum);
+    return Apify.utils.sleep(Math.floor(Math.random() * (max - min + 1)) + min);
+}
 
 function callForReview(placeId = 300974, client, offset = 0, limit = 100) {
     return client.post("/batched",
@@ -82,7 +88,7 @@ async function getPlacePrices(placeId) {
         throw new Error(`Could not find offers for: ${placeId}`)
     }
     if (!isLoaded) {
-        await Apify.utils.sleep(300);
+        await radnomDelay();
         return await getPlacePrices(placeId);
     }
     return offers
@@ -141,6 +147,14 @@ const processReview = (review, remoteId) => {
     };
 };
 
+function findLastReviewIndex(reviews) {
+    return reviews.findIndex(r => {
+        const rDate = moment(r.publishedDate);
+        const userMaxDate = moment(global.LAST_REVIEW_DATE);
+        return rDate.isBefore(userMaxDate);
+    });
+}
+
 async function getReviews(id, client) {
     const result = [];
     let offset = 0;
@@ -156,13 +170,21 @@ async function getReviews(id, client) {
         }
 
         const reviewData = resp.data[0].data.locations[0].reviewList;
-        const {totalCount, reviews} = reviewData;
+        const {totalCount} = reviewData;
+        let {reviews} = reviewData;
+        const lastIndex = findLastReviewIndex(reviews);
+        const shouldSlice = lastIndex >= 0;
+        if (shouldSlice) {
+            reviews = reviews.slice(0, lastIndex)
+        }
+        console.log(lastIndex, "LAST");
         const needToFetch = totalCount - limit;
 
         log.info(`Going to process ${totalCount} reviews`);
 
         numberOfFetches = Math.ceil(needToFetch / limit);
         reviews.forEach(review => result.push(processReview(review)));
+       if(shouldSlice) return reviews;
     } catch (e) {
         log.error(e, "Could not make initial request")
     }
@@ -172,9 +194,16 @@ async function getReviews(id, client) {
             offset += limit;
             const response = await callForReview(id, client, offset, limit);
             const reviewData = response.data[0].data.locations[0].reviewList;
-            const {reviews} = reviewData;
+            let {reviews} = reviewData;
+            const lastIndex = findLastReviewIndex(reviews);
+            const shouldSlice = lastIndex >= 0;
+            if (shouldSlice) {
+                reviews = reviews.slice(0, lastIndex)
+            }
+            console.log(lastIndex, "LAST");
 
             reviews.forEach(review => result.push(processReview(review)));
+            if(shouldSlice) break;
             await Apify.utils.sleep(300);
         }
     } catch (e) {
@@ -188,7 +217,7 @@ async function getReviews(id, client) {
 async function getPlaceInfoAndReview(id, client) {
     let placeInfo;
     let reviews = [];
-    if(global.INCLUDE_REVIEWS) {
+    if (global.INCLUDE_REVIEWS) {
         try {
             reviews = await getReviews(id, client);
         } catch (e) {
@@ -289,7 +318,9 @@ function getHours(placeInfo) {
 
 async function processRestaurant(id, client, dataset, input) {
     const {reviews, placeInfo} = await getPlaceInfoAndReview(id, client, input);
-
+    if (!placeInfo) {
+        return;
+    }
     const place = {
         id: placeInfo.location_id,
         name: placeInfo.name,
@@ -333,5 +364,6 @@ module.exports = {
     buildRestaurantUrl,
     getRestaurantIds,
     processRestaurant,
-    getClient
+    getClient,
+    radnomDelay
 };
