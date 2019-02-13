@@ -1,6 +1,7 @@
 const axios = require("axios");
 const Apify = require('apify');
-const cheerio =require("cheerio");
+const cheerio = require("cheerio");
+const moment =require("moment");
 const {utils: {log}} = Apify;
 const {ReviewQuery} = require("./graphql-queries");
 const API_KEY = "3c7beec8-846d-4377-be03-71cae6145fdc";
@@ -73,11 +74,13 @@ async function getLocationId(searchString) {
 }
 
 async function getPlacePrices(placeId) {
-    const date = new Date();
-    const dateString = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-    let response = await axios.get(`https://api.tripadvisor.com/api/internal/1.19/en/meta_hac/${placeId}?adults=2&checkin=2019-02-12&currency=USD&lod=extended&nights=1`, {headers: {"X-TripAdvisor-API-Key": API_KEY}})
+    const dateString = moment().format("YYYY-MM-DD");
+    let response = await axios.get(`https://api.tripadvisor.com/api/internal/1.19/en/meta_hac/${placeId}?adults=2&checkin=${dateString}&currency=USD&lod=extended&nights=1`, {headers: {"X-TripAdvisor-API-Key": API_KEY}})
     let offers = response.data.data[0].hac_offers;
     const isLoaded = offers && offers.availability && offers.availability !== "pending";
+    if (!offers) {
+        throw new Error(`Could not find offers for: ${placeId}`)
+    }
     if (!isLoaded) {
         await Apify.utils.sleep(300);
         return await getPlacePrices(placeId);
@@ -91,7 +94,7 @@ function buildHotelUrl(locationId, offset) {
 }
 
 async function getPlaceInformation(placeId) {
-    const response = await axios.get(`https://api.tripadvisor.com/api/internal/1.14/location/${placeId}`, {headers: {"X-TripAdvisor-API-Key": API_KEY}})
+    const response = await axios.get(`https://api.tripadvisor.com/api/internal/1.14/location/${placeId}`, {headers: {"X-TripAdvisor-API-Key": API_KEY}});
     return response.data;
 }
 
@@ -172,6 +175,7 @@ async function getReviews(id, client) {
             const {reviews} = reviewData;
 
             reviews.forEach(review => result.push(processReview(review)));
+            await Apify.utils.sleep(300);
         }
     } catch (e) {
         log.error(e, "Could not make additional requests")
@@ -181,16 +185,43 @@ async function getReviews(id, client) {
 
 }
 
+async function getPlaceInfoAndReview(id, client) {
+    let placeInfo;
+    let reviews = [];
+    if(global.INCLUDE_REVIEWS) {
+        try {
+            reviews = await getReviews(id, client);
+        } catch (e) {
+            log.error("Could not get reviews", e)
+        }
+    }
+
+    try {
+        placeInfo = await getPlaceInformation(id);
+    } catch (e) {
+        log.error("Could not get place info", e)
+    }
+    return {placeInfo, reviews}
+}
+
 async function processHotels(id, client, dataset) {
-    const reviews = await getReviews(id, client);
-    const placeInfo = await getPlaceInformation(id);
-    const placePrices = await getPlacePrices(id);
-    const prices = placePrices.offers.map(offer => ({
+    let placePrices;
+    const {reviews, placeInfo} = await getPlaceInfoAndReview(id, client);
+    try {
+        placePrices = await getPlacePrices(id);
+    } catch (e) {
+        log.warning("Hotels: Could not get place prices", {errorMessage: e.message})
+    }
+
+    if (!placeInfo || !reviews) {
+        return;
+    }
+    const prices = placePrices ? placePrices.offers.map(offer => ({
         provider: offer.provider_display_name,
         price: offer.display_price_int ? offer.display_price_int : "NOT_PROVIDED",
         isBookable: offer.is_bookable,
         link: offer.link
-    }));
+    })) : [];
     const place = {
         id: placeInfo.location_id,
         name: placeInfo.name,
@@ -239,14 +270,15 @@ function getRestaurantIds($) {
     });
     return ids
 }
-function getHours(placeInfo){
+
+function getHours(placeInfo) {
     const placeHolder = [];
 
     if (!placeInfo.hours) {
         return placeHolder;
     }
 
-    if(!placeInfo.hours.week_ranges){
+    if (!placeInfo.hours.week_ranges) {
         return placeHolder;
     }
 
@@ -255,9 +287,9 @@ function getHours(placeInfo){
 }
 
 
-async function processRestaurant(id, client, dataset) {
-    const placeInfo = await getPlaceInformation(id);
-    const reviews = await getReviews(id, client);
+async function processRestaurant(id, client, dataset, input) {
+    const {reviews, placeInfo} = await getPlaceInfoAndReview(id, client, input);
+
     const place = {
         id: placeInfo.location_id,
         name: placeInfo.name,
