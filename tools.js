@@ -184,7 +184,7 @@ async function getReviews(id, client) {
 
         numberOfFetches = Math.ceil(needToFetch / limit);
         reviews.forEach(review => result.push(processReview(review)));
-       if(shouldSlice) return reviews;
+       if(shouldSlice) return result;
     } catch (e) {
         log.error(e, "Could not make initial request")
     }
