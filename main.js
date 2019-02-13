@@ -73,7 +73,6 @@ Apify.main(async () => {
                 }
                 await resolveInBatches(promises);
             } else if (request.userData.hotelList) {
-                console.log("HOTELLIST");
                 try {
                     client = await getClient();
                     console.log("PROCESSING HOTEL LIST ", request.url);
@@ -96,6 +95,7 @@ Apify.main(async () => {
                 }
                 await resolveInBatches(promises);
             } else if (request.userData.restaurantList) {
+                client = await getClient();
                 const restaurantIds = getRestaurantIds($);
                 await resolveInBatches(restaurantIds.map(id => processRestaurant(id, client, restaurants)))
             } else if (request.userData.restaurantDetail) {

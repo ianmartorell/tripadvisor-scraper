@@ -1,0 +1,26 @@
+{
+  "title": "Cheerio Crawler input",
+  "description": "To update crawler to another site you need to change startUrls and pageFunction options!",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "RESTAURANTS": {
+      "title": "Restaurants",
+      "type": "boolean",
+      "description": "If checked include restaurants for given location.",
+      "default": true,
+      "groupCaption": "Options",
+      "groupDescription": "Types of Places"
+    },
+    "HOTELS": {
+      "title": "Hotels",
+      "type": "boolean",
+      "description": "If checked include hotels for given location.",
+      "default": true
+    }
+  },
+  "required": [
+    "startUrls",
+    "pageFunction"
+  ]
+}
