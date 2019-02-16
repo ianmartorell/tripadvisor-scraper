@@ -2,16 +2,20 @@
 	"name": "tripadvisor-public",
 	"version": "1.0.0",
 	"description": "Crawl a number of web pages using headless Chrome and Puppeteer",
-	"main": "main.js",
+	"main": "index.js",
 	"dependencies": {
 		"apify": "^0.11.0",
 		"axios": "^0.18.0",
 		"cheerio": "^1.0.0-rc.2",
+		"eslint": "^5.14.0",
+		"eslint-config-airbnb-base": "^13.1.0",
+		"eslint-plugin-import": "^2.16.0",
+		"eslint-plugin-promise": "^4.0.1",
 		"moment": "^2.24.0"
 	},
 	"devDependencies": {},
 	"scripts": {
-		"start": "node main.js",
+		"start": "node index.js",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"repository": {
