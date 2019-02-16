@@ -20,7 +20,7 @@ const {utils: {log}} = Apify;
 Apify.main(async () => {
     // Create and initialize an instance of the RequestList class that contains the start URL.
     const input = await Apify.getValue("INPUT");
-    const {locationFullName, placeTypes, includeReviews, lastReviewDate, hotelId, restaurantId} = input; //TODO: COMMENT IN README HOW THE LOCATION STRING SHOULD LOOK LIKE
+    const {locationFullName,includeRestaurants, includeHotels, includeReviews, lastReviewDate, hotelId, restaurantId} = input; //TODO: COMMENT IN README HOW THE LOCATION STRING SHOULD LOOK LIKE
     global.INCLUDE_REVIEWS = includeReviews;
     global.LAST_REVIEW_DATE = lastReviewDate;
     const timeStamp = Date.now();
@@ -34,7 +34,7 @@ Apify.main(async () => {
         locationId = await getLocationId(locationFullName); //@TODO: ERROR could not obtain location id from search string;
         console.log(locationId, "LOCATIONID");
         requestList = new Apify.RequestList({
-            sources: getRequestListSources(locationId, placeTypes)
+            sources: getRequestListSources(locationId, includeHotels, includeRestaurants)
         });
     }
 

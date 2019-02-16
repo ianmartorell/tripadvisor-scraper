@@ -276,15 +276,15 @@ function buildRestaurantUrl(locationId, offset) {
     return `https://www.tripadvisor.com/RestaurantSearch?Action=PAGE&geo=${locationId}&ajax=1&sortOrder=relevance&${offset ? `o=a${offset}` : ""}&availSearchEnabled=false`
 }
 
-function getRequestListSources(locationId, placeTypes) {
+function getRequestListSources(locationId, includeHotesl, includeRestaurants) {
     const sources = [];
-    if (placeTypes.includes("HOTELS")) {
+    if (includeHotesl) {
         sources.push({
             url: buildHotelUrl(locationId),
             userData: {initialHotel: true}
         })
     }
-    if (placeTypes.includes("RESTAURANTS")) {
+    if (includeRestaurants) {
         sources.push({
             url: buildRestaurantUrl(locationId),
             userData: {initialRestaurant: true}
