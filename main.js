@@ -25,8 +25,9 @@ Apify.main(async () => {
     global.LAST_REVIEW_DATE = lastReviewDate;
     const timeStamp = Date.now();
     let requestList;
-    let restaurants;
-    let hotels;
+    // let restaurants;
+    // let hotels;
+    let generalDataset = await Apify.openDataset();
     let locationId;
     if (locationFullName) {
         restaurants = await Apify.openDataset(`restaurants-${timeStamp}`);
@@ -77,7 +78,7 @@ Apify.main(async () => {
                     client = await getClient();
                     console.log("PROCESSING HOTEL LIST ", request.url);
                     const hotelIds = getHotelIds($);
-                    await resolveInBatches(hotelIds.map(id => processHotel(id, client, hotels)))
+                    await resolveInBatches(hotelIds.map(id => processHotel(id, client, generalDataset)))
                 }
 
                 catch (e) {
@@ -97,7 +98,7 @@ Apify.main(async () => {
             } else if (request.userData.restaurantList) {
                 client = await getClient();
                 const restaurantIds = getRestaurantIds($);
-                await resolveInBatches(restaurantIds.map(id => processRestaurant(id, client, restaurants)))
+                await resolveInBatches(restaurantIds.map(id => processRestaurant(id, client, generalDataset)))
             } else if (request.userData.restaurantDetail) {
                 client = await getClient();
                 await processRestaurant(request.userData.restaurantId, client);

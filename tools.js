@@ -251,6 +251,7 @@ async function processHotel(id, client, dataset) {
     })) : [];
     const place = {
         id: placeInfo.location_id,
+        type: "HOTEL",
         name: placeInfo.name,
         awards: placeInfo.awards.map(award => ({year: award.year, name: award.display_name})),
         rankingPosition: placeInfo.ranking_position,
@@ -325,6 +326,7 @@ async function processRestaurant(id, client, dataset) {
     }
     const place = {
         id: placeInfo.location_id,
+        type: "RESTAURANT",
         name: placeInfo.name,
         awards: placeInfo.awards.map(award => ({year: award.year, name: award.display_name})),
         rankingPosition: placeInfo.ranking_position,
