@@ -1,13 +1,34 @@
 {
-  "title": "Cheerio Crawler input",
-  "description": "To update crawler to another site you need to change startUrls and pageFunction options!",
+  "title": "TripAdvisor API/Scrapper input",
+  "description": "To unleashed the full power of the scrapper/API use the options bellow!",
   "type": "object",
   "schemaVersion": 1,
   "properties": {
+    "locationFullName": {
+      "title": "Full Name of Location",
+      "type": "string",
+      "description": "Location name as you would enter to TripAdvisor search. Actor takes the first result as desired location",
+      "default": "Prague",
+      "editor": "textfield"
+    },
+    "includeReviews": {
+      "title": "Include reviews",
+      "type": "boolean",
+      "description": "If checked results includes reviews data",
+      "default": false
+    },
+    "lastReviewDate": {
+      "title": "Date of Last Review",
+      "type": "string",
+      "description": "It is a date where the scrapper stops loading older reviews ",
+      "default": "2019-01-01",
+      "prefill": "2019-01-01",
+      "editor": "textfield"
+    },
     "RESTAURANTS": {
       "title": "Restaurants",
       "type": "boolean",
-      "description": "If checked include restaurants for given location.",
+      "description": "If checked results includes restaurants for given location.",
       "default": true,
       "groupCaption": "Options",
       "groupDescription": "Types of Places"
@@ -15,12 +36,10 @@
     "HOTELS": {
       "title": "Hotels",
       "type": "boolean",
-      "description": "If checked include hotels for given location.",
+      "description": "If checked results includes hotels for given location.",
       "default": true
     }
   },
   "required": [
-    "startUrls",
-    "pageFunction"
   ]
 }
