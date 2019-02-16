@@ -1,3 +1,4 @@
+const querystring = require("querystring");
 const axios = require("axios");
 const Apify = require('apify');
 const cheerio = require("cheerio");
@@ -71,10 +72,11 @@ async function resolveInBatches(promiseArray, batchLength = 10) {
 }
 
 async function getLocationId(searchString) {
-    const result = await axios.post(`https://api.tripadvisor.com/api/internal/1.14/typeahead?alternate_tag_name=true&auto_broaden=true&default_options=?&category_type=neighborhoods%2Cgeos&currency=CZK&query=${searchString}`, {}, {headers: {"X-TripAdvisor-API-Key": API_KEY}})
+    const query = querystring.stringify({query: searchString});
+    const result = await axios.post(`https://api.tripadvisor.com/api/internal/1.14/typeahead?alternate_tag_name=true&auto_broaden=true&default_options=?&category_type=neighborhoods%2Cgeos&currency=CZK&${query}`, {}, {headers: {"X-TripAdvisor-API-Key": API_KEY}})
     const data = result.data.data;
     if (!result.data.data) {
-        throw new Error(`Could not find location "${locationFullName}"`);
+        throw new Error(`Could not find location "${searchString}"`);
     }
     return data[0].result_object.location_id;
 }
