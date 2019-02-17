@@ -141,8 +141,6 @@ async function getReviews(id, client) {
             if (shouldSlice) {
                 reviews = reviews.slice(0, lastIndex);
             }
-            console.log(lastIndex, 'LAST');
-
             reviews.forEach(review => result.push(processReview(review)));
             if (shouldSlice) break;
             await Apify.utils.sleep(300);
