@@ -207,6 +207,7 @@ async function processHotel(id, client, dataset) {
         prices,
         reviews,
     };
+    log.debug('Data for hotel: ', place);
     if (dataset) {
         await dataset.pushData(place);
     } else {
@@ -279,6 +280,7 @@ async function processRestaurant(id, client, dataset) {
         hours: getHours(placeInfo),
         reviews,
     };
+    log.debug('Data for restaurant: ', place);
 
     if (dataset) {
         await dataset.pushData(place);

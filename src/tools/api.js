@@ -1,9 +1,7 @@
 const querystring = require('querystring');
 const axios = require('axios');
 const moment = require('moment');
-
 const { ReviewQuery } = require('./graphql-queries');
-const { randomDelay } = require('./general');
 
 const API_KEY = '3c7beec8-846d-4377-be03-71cae6145fdc';
 
