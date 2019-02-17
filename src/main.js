@@ -33,6 +33,7 @@ Apify.main(async () => {
         hotelId,
         restaurantId,
     } = input;
+    log.debug('Received input', input);
     global.INCLUDE_REVIEWS = includeReviews;
     global.LAST_REVIEW_DATE = lastReviewDate;
     // const timeStamp = Date.now();
@@ -44,7 +45,8 @@ Apify.main(async () => {
     if (locationFullName) {
         // restaurants = await Apify.openDataset(`restaurants-${timeStamp}`);
         // hotels = await Apify.openDataset(`hotels-${timeStamp}`);
-        locationId = await getLocationId(locationFullName); // @TODO: ERROR could not obtain location id from search string;
+
+        locationId = await getLocationId(locationFullName);
         log.info(`Processing locationId: ${locationId}`);
         requestList = new Apify.RequestList({
             sources: getRequestListSources(locationId, includeHotels, includeRestaurants),
@@ -52,10 +54,12 @@ Apify.main(async () => {
     }
 
     if (restaurantId) {
+        log.debug(`Processing restaurant ${restaurantId}`);
         requestList = new Apify.RequestList({
             sources: [{ url: 'https://www.tripadvisor.com', userData: { restaurantId, restaurantDetail: true } }],
         });
     } else if (hotelId) {
+        log.debug(`Processing hotel ${restaurantId}`);
         requestList = new Apify.RequestList({
             sources: [{ url: 'https://www.tripadvisor.com', userData: { hotelId, hotelDetail: true } }],
         });
@@ -70,31 +74,40 @@ Apify.main(async () => {
         requestQueue,
         handlePageFunction: async ({ request, $ }) => {
             let client;
+
             if (request.userData.initialHotel) {
-                log.info(`Processing ${request.url}...`);
-                // const numberOfHotels = $('.descriptive_header_text .highlight').first().text();
+                // Process initial hotelList url and add others with pagination to request queue
+                log.info(`Processing initial step ${request.url}...`);
                 const lastDataOffset = $('a.pageNum').last().attr('data-offset') || 0;
+                log.info(`Processing hotels with last data offset: ${lastDataOffset}`);
                 const promises = [];
                 for (let i = 0; i <= lastDataOffset; i += 30) {
                     promises.push(requestQueue.addRequest({
                         url: buildHotelUrl(locationId, i.toString()),
                         userData: { hotelList: true },
                     }));
+                    log.debug(`Adding location with ID: ${locationId} Offset: ${i.toString()}`);
                     await randomDelay();
                 }
                 await resolveInBatches(promises);
             } else if (request.userData.hotelList) {
+                // Gets ids of hotels from hotelList -> gets data for given id and saves hotel to dataset
                 try {
                     client = await getClient();
-                    log.info('PROCESSING HOTEL LIST ', request.url);
+                    log.info('Processing hotel list ', request.url);
                     const hotelIds = getHotelIds($);
-                    await resolveInBatches(hotelIds.map(id => processHotel(id, client, generalDataset)));
+                    await resolveInBatches(hotelIds.map((id) => {
+                        log.debug(`Processing hotel with ID: ${id}`);
+                        return processHotel(id, client, generalDataset);
+                    }));
                 } catch (e) {
-                    log.error('Hotel list: Could not get client', e);
+                    log.error('Hotel list error', e);
                 }
             } else if (request.userData.initialRestaurant) {
+                // Process initial restaurantList url and add others with pagination to request queue
                 const promises = [];
                 const maxOffset = $('.pageNum.taLnk').last().attr('data-offset') || 0;
+                log.info(`Processing restaurants with last data offset: ${maxOffset}`);
                 for (let i = 0; i <= maxOffset; i += 30) {
                     promises.push(requestQueue.addRequest({
                         url: buildRestaurantUrl(locationId, i.toString()),
@@ -104,15 +117,29 @@ Apify.main(async () => {
                 }
                 await resolveInBatches(promises);
             } else if (request.userData.restaurantList) {
+                // Gets ids of restaurants from restaurantList -> gets data for given id and saves restaurant to dataset
+                log.info('Processing restaurant list ', request.url);
                 client = await getClient();
                 const restaurantIds = getRestaurantIds($);
-                await resolveInBatches(restaurantIds.map(id => processRestaurant(id, client, generalDataset)));
+                await resolveInBatches(restaurantIds.map((id) => {
+                    log.debug(`Processing restaurant with ID: ${id}`);
+
+                    return processRestaurant(id, client, generalDataset);
+                }));
             } else if (request.userData.restaurantDetail) {
+                // For API usage only gets restaurantId from input and sets OUTPUT.json to key-value store
+                //  a.k.a. returns response with restaurant data
+                const { restaurantId: id } = request.userData;
+                log.info(`Processing single API request for restaurant with id: ${id}`);
                 client = await getClient();
-                await processRestaurant(request.userData.restaurantId, client);
+                await processRestaurant(restaurantId, client);
             } else if (request.userData.hotelDetail) {
+                // For API usage only gets hotelId from input and sets OUTPUT.json to key-value store
+                //  a.k.a. returns response with hotel data
+                const { hotelId: id } = request.userData;
+                log.info(`Processing single API request for hotel with id: ${id}`);
                 client = await getClient();
-                await processHotel(request.userData.hotelId, client);
+                await processHotel(hotelId, client);
             }
         },
         handleFailedRequestFunction: async ({ request }) => {

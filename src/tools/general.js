@@ -176,7 +176,7 @@ async function processHotel(id, client, dataset) {
     let placePrices;
     const { reviews, placeInfo } = await getPlaceInfoAndReview(id, client);
     try {
-        placePrices = await getPlacePrices(id);
+        placePrices = await getPlacePrices(id, randomDelay);
     } catch (e) {
         log.warning('Hotels: Could not get place prices', { errorMessage: e.message });
     }

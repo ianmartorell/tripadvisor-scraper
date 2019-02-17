@@ -36,19 +36,26 @@ async function getLocationId(searchString) {
         currency: 'USD',
 
     });
-    const result = await axios.post(
-        `https://api.tripadvisor.com/api/internal/1.14/typeahead?${queryString}`,
-        {},
-        { headers: { 'X-TripAdvisor-API-Key': API_KEY } },
-    );
+    let error;
+    let result;
+    try {
+        result = await axios.post(
+            `https://api.tripadvisor.com/api/internal/1.14/typeahead?${queryString}`,
+            {},
+            { headers: { 'X-TripAdvisor-API-Key': API_KEY } },
+        );
+    } catch (e) {
+        error = e;
+    }
     const { data } = result.data;
-    if (!result.data.data) {
-        throw new Error(`Could not find location "${searchString}"`);
+
+    if (!data || error) {
+        throw new Error(`Could not find location "${searchString}" reason: ${error.message}`);
     }
     return data[0].result_object.location_id;
 }
 
-async function getPlacePrices(placeId) {
+async function getPlacePrices(placeId, delay) {
     const dateString = moment().format('YYYY-MM-DD');
     const response = await axios.get(
         `https://api.tripadvisor.com/api/internal/1.19/en/meta_hac/${placeId}?adults=2&checkin=${dateString}&currency=USD&lod=extended&nights=1`,
@@ -60,8 +67,8 @@ async function getPlacePrices(placeId) {
         throw new Error(`Could not find offers for: ${placeId}`);
     }
     if (!isLoaded) {
-        await randomDelay();
-        return getPlacePrices(placeId);
+        await delay();
+        return getPlacePrices(placeId, delay);
     }
     return offers;
 }
