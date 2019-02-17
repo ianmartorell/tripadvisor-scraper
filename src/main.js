@@ -8,11 +8,13 @@ const {
     processRestaurant,
     getClient,
     randomDelay,
+    validateInput,
 } = require('./tools/general');
 
 const {
     getLocationId,
     buildRestaurantUrl,
+    buildHotelUrl,
 } = require('./tools/api');
 
 const { utils: { log } } = Apify;
@@ -21,15 +23,16 @@ const { utils: { log } } = Apify;
 Apify.main(async () => {
     // Create and initialize an instance of the RequestList class that contains the start URL.
     const input = await Apify.getValue('INPUT');
+    validateInput(input);
     const {
         locationFullName,
-        includeRestaurants,
-        includeHotels,
-        includeReviews,
-        lastReviewDate,
+        includeRestaurants = true,
+        includeHotels = true,
+        includeReviews = true,
+        lastReviewDate = '2010-01-01',
         hotelId,
         restaurantId,
-    } = input; // TODO: COMMENT IN README HOW THE LOCATION STRING SHOULD LOOK LIKE
+    } = input;
     global.INCLUDE_REVIEWS = includeReviews;
     global.LAST_REVIEW_DATE = lastReviewDate;
     // const timeStamp = Date.now();

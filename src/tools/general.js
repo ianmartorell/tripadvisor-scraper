@@ -2,6 +2,7 @@ const axios = require('axios');
 const Apify = require('apify');
 const cheerio = require('cheerio');
 const moment = require('moment');
+const check = require('check-types');
 const { callForReview, getPlacePrices, buildHotelUrl, buildRestaurantUrl, getPlaceInformation } = require('./api');
 
 const { utils: { log } } = Apify;
@@ -297,6 +298,49 @@ async function getClient() {
         },
     });
 }
+function validateInput(input) {
+    const {
+        locationFullName,
+        hotelId,
+        restaurantId,
+        includeRestaurants,
+        includeHotels,
+        includeReviews,
+        lastReviewDate,
+    } = input;
+    const getError = (property, type = 'string') => new Error(`${property} should be a ${type}`);
+    const checkStringProperty = (property, propertyName) => {
+        if (property && !check.string(property)) {
+            throw getError(propertyName);
+        }
+    };
+    const checkBooleanProperty = (property, propertyName) => {
+        if (property && !check.boolean(property)) {
+            throw getError(propertyName, 'boolean');
+        }
+    };
+
+    // Check types
+    // strings
+    checkStringProperty(locationFullName, 'locationFullName');
+    checkStringProperty(hotelId, 'hotelId');
+    checkStringProperty(restaurantId, 'restaurantId');
+    checkStringProperty(lastReviewDate, 'lasReviewData');
+
+    // boleans
+    checkBooleanProperty(includeRestaurants, 'includeRestaurants');
+    checkBooleanProperty(includeHotels, 'includeHotels');
+    checkBooleanProperty(includeReviews, 'includeReviews');
+
+    // Should have all required fields
+    if (!locationFullName && !hotelId && !restaurantId) {
+        throw new Error('At least one of properties: locationFullName, hotelId, restaurantId should be set');
+    }
+    if (!includeHotels && !includeRestaurants) {
+        throw new Error('At least one of properties: includeHotels or includeRestaurants should be true');
+    }
+    log.info('Input validation OK');
+}
 
 module.exports = {
     resolveInBatches,
@@ -307,4 +351,5 @@ module.exports = {
     processRestaurant,
     getClient,
     randomDelay,
+    validateInput,
 };
