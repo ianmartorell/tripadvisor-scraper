@@ -108,7 +108,7 @@ async function getReviews(id, client) {
         const { errors } = resp.data[0];
 
         if (errors) {
-            log.exception(errors, 'Graphql error');
+            log.error('Graphql error', errors);
         }
 
         const reviewData = resp.data[0].data.locations[0].reviewList;
