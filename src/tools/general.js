@@ -78,14 +78,7 @@ const processReview = (review, remoteId) => {
     }
 
     return {
-        text,
-        title,
-        rating,
-        stayDate,
-        publishedDate,
-        userLocation,
-        userContributions,
-        remoteId,
+        ...review,
     };
 };
 
@@ -189,20 +182,8 @@ async function processHotel(id, client, dataset) {
         link: offer.link,
     })) : [];
     const place = {
-        id: placeInfo.location_id,
-        type: 'HOTEL',
-        name: placeInfo.name,
-        awards: placeInfo.awards.map(award => ({ year: award.year, name: award.display_name })),
-        rankingPosition: placeInfo.ranking_position,
-        priceLevel: placeInfo.price_level,
-        category: placeInfo.ranking_category,
-        rating: placeInfo.rating,
-        hotelClass: placeInfo.hotel_class,
-        hotelClassAttribution: placeInfo.hotel_class_attribution,
-        phone: placeInfo.phone,
-        address: placeInfo.address,
-        amenities: placeInfo.amenities.map(amenity => amenity.name),
-        prices,
+        ...placePrices,
+        ...placeInfo,
         reviews,
     };
     log.debug('Data for hotel: ', place);
@@ -261,21 +242,7 @@ async function processRestaurant(id, client, dataset) {
         return;
     }
     const place = {
-        id: placeInfo.location_id,
-        type: 'RESTAURANT',
-        name: placeInfo.name,
-        awards: placeInfo.awards.map(award => ({ year: award.year, name: award.display_name })),
-        rankingPosition: placeInfo.ranking_position,
-        priceLevel: placeInfo.price_level,
-        category: placeInfo.ranking_category,
-        rating: placeInfo.rating,
-        isClosed: placeInfo.is_closed,
-        isLongClosed: placeInfo.is_long_closed,
-        phone: placeInfo.phone,
-        address: placeInfo.address,
-        cuisine: placeInfo.cuisine.map(cuisine => cuisine.name),
-        mealTypes: placeInfo.mealTypes && placeInfo.mealTypes.map(m => m.name),
-        hours: getHours(placeInfo),
+       ...placeInfo,
         reviews,
     };
     log.debug('Data for restaurant: ', place);
