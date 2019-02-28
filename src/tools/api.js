@@ -3,7 +3,7 @@ const axios = require('axios');
 const moment = require('moment');
 const { ReviewQuery } = require('./graphql-queries');
 
-const API_KEY = '3c7beec8-846d-4377-be03-71cae6145fdc';
+const { API_KEY } = process.env;
 
 function callForReview(placeId = 300974, client, offset = 0, limit = 100) {
     return client.post('/batched',
