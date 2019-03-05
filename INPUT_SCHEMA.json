@@ -38,6 +38,18 @@
       "type": "boolean",
       "description": "If checked results includes reviews data",
       "default": false
+    },
+    "hotelId": {
+      "title": "Hotel id",
+      "type": "string",
+      "description": "Id of hotel",
+      "editor": "hidden"
+    },
+    "restaurantId": {
+      "title": "Restaurant id",
+      "type": "string",
+      "description": "Id of restaurant",
+      "editor": "hidden"
     }
   },
   "required": ["locationFullName", "includeReviews"]
