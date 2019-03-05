@@ -1,4 +1,6 @@
 const Apify = require('apify');
+
+process.env.API_KEY = '3c7beec8-846d-4377-be03-71cae6145fdc';
 const {
     getHotelIds,
     resolveInBatches,
@@ -82,7 +84,7 @@ Apify.main(async () => {
                 log.info(`Processing hotels with last data offset: ${lastDataOffset}`);
                 const promises = [];
                 for (let i = 0; i <= lastDataOffset; i += 30) {
-                    promises.push(requestQueue.addRequest({
+                    promises.push(() => requestQueue.addRequest({
                         url: buildHotelUrl(locationId, i.toString()),
                         userData: { hotelList: true },
                     }));
@@ -98,7 +100,7 @@ Apify.main(async () => {
                     const hotelIds = getHotelIds($);
                     await resolveInBatches(hotelIds.map((id) => {
                         log.debug(`Processing hotel with ID: ${id}`);
-                        return processHotel(id, client, generalDataset);
+                        return () => processHotel(id, client, generalDataset);
                     }));
                 } catch (e) {
                     log.error('Hotel list error', e);
@@ -109,7 +111,7 @@ Apify.main(async () => {
                 const maxOffset = $('.pageNum.taLnk').last().attr('data-offset') || 0;
                 log.info(`Processing restaurants with last data offset: ${maxOffset}`);
                 for (let i = 0; i <= maxOffset; i += 30) {
-                    promises.push(requestQueue.addRequest({
+                    promises.push(() => requestQueue.addRequest({
                         url: buildRestaurantUrl(locationId, i.toString()),
                         userData: { restaurantList: true },
                     }));
@@ -124,7 +126,7 @@ Apify.main(async () => {
                 await resolveInBatches(restaurantIds.map((id) => {
                     log.debug(`Processing restaurant with ID: ${id}`);
 
-                    return processRestaurant(id, client, generalDataset);
+                    return () => processRestaurant(id, client, generalDataset);
                 }));
             } else if (request.userData.restaurantDetail) {
                 // For API usage only gets restaurantId from input and sets OUTPUT.json to key-value store

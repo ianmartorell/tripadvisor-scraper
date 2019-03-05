@@ -42,7 +42,11 @@ function getCookies(response) {
 async function resolveInBatches(promiseArray, batchLength = 10) {
     const promises = [];
     for (const promise of promiseArray) {
-        promises.push(promise);
+        if (typeof promise === 'function') {
+            promises.push(promise());
+        } else {
+            promises.push(promise);
+        }
         if (promises.length % batchLength === 0) await Promise.all(promises);
     }
     return Promise.all(promises);
