@@ -5,20 +5,14 @@
   "schemaVersion": 1,
   "properties": {
     "locationFullName": {
-      "title": "Full Name of Location",
+      "title": "Location",
       "type": "string",
       "description": "Location name as you would enter to TripAdvisor search. Actor takes the first result as desired location",
       "default": "Prague",
       "editor": "textfield"
     },
-    "includeReviews": {
-      "title": "Include reviews",
-      "type": "boolean",
-      "description": "If checked results includes reviews data",
-      "default": false
-    },
     "lastReviewDate": {
-      "title": "Date of Last Review",
+      "title": "Reviews since date",
       "type": "string",
       "description": "It is a date where the scrapper stops loading older reviews ",
       "default": "2019-01-01",
@@ -26,7 +20,7 @@
       "editor": "textfield"
     },
     "includeRestaurants": {
-      "title": "Restaurants",
+      "title": "Include restaurants",
       "type": "boolean",
       "description": "If checked results includes restaurants for given location.",
       "default": true,
@@ -34,10 +28,16 @@
       "groupDescription": "Types of Places"
     },
     "includeHotels": {
-      "title": "Hotels",
+      "title": "Include Hotels",
       "type": "boolean",
       "description": "If checked results includes hotels for given location.",
       "default": true
+    },
+    "includeReviews": {
+      "title": "Include reviews",
+      "type": "boolean",
+      "description": "If checked results includes reviews data",
+      "default": false
     }
   },
   "required": ["locationFullName", "includeReviews"]
