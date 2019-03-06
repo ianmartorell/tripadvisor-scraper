@@ -1,12 +1,13 @@
 # TripAdvisor API/Scrapper
-Get the data from TripAdvisor fast and simple. API is now available for restaurants and hotels.
-It is suitable for such a use cases as getting reviews, emails, addresses, awards  and many more attributes of hotels and restaurants on TripAdvisor.
-You can either enter the location and retrieve the data from the dataset or send synchronous request to actor endpoint and get all the information about a single place (hotel, restaurant) in 15 seconds.
+Get the data from TripAdvisor fast and straightforward. API is now available for restaurants and hotels.
+It is suitable for such use cases as getting reviews, emails, addresses, awards and many more attributes of hotels and restaurants on TripAdvisor.
+You can either enter the location and retrieve the data from the dataset or send a synchronous request to actor endpoint and get all the information about a single place (hotel, restaurant) in 15 seconds.
+
 ## Why ?
-Since TripAdvisor does not provide any reasonable open API for 3rd parties, in Apify we decided to make our own!
+Since TripAdvisor does not provide any consistent open API for 3rd parties, in Apify we decided to make our own!
 
 ## Data You Can Get
-You can get a various of data about a single place as well as about a whole location including some of the most wanted informations such as `email`, `phone`, `price` and `reviews`. It is possible get the data in various formats such as `JSON`, `CSV`, `XML` and others for more reference see the [Apify Docs](https://www.apify.com/docs).
+You can get a variety of data about a single place as well as about a full location including some of the most necessary information such as `email`, `phone`, `price` and `reviews`. It is possible to get the data in various formats such as `JSON`, `CSV`, `XML` and others for more reference see the [Apify Docs](https://www.apify.com/docs).
 
 **Here is an example of `JSON` output:**
 

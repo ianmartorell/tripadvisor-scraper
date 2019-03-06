@@ -25,7 +25,7 @@
       "description": "If checked results includes restaurants for given location.",
       "default": true,
       "groupCaption": "Options",
-      "groupDescription": "Types of Places"
+      "groupDescription": "Information that will be included"
     },
     "includeHotels": {
       "title": "Include Hotels",
