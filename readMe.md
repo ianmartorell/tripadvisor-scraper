@@ -1,14 +1,14 @@
-## TripAdvisor API limitation
-Since TripAdvisor does not provide any consistent open API for 3rd parties, in Apify we decided to make our own!
+## TripAdvisor API limitations
+Since TripAdvisor does not provide a consistent open API for 3rd parties, we at Apify decided to make our own!
 
-# TripAdvisor Scrapper
-Get the data from TripAdvisor fast and straightforward. Scraper is now available for restaurants and hotels. It is suitable for such use cases as scraping TripAdvisor reviews, emails, addresses, awards and many more attributes of hotels and restaurants on TripAdvisor.
+# TripAdvisor Scraper
+Get data from TripAdvisor fast and easily. A scraper is now available for restaurants and hotels. It's suitable for such use cases as scraping TripAdvisor reviews, emails, addresses, awards and many more attributes of hotels and restaurants on TripAdvisor.
 
 ## Input - TripAdvisor Crawler
-You can either enter the location and download the data from the dataset or send a synchronous request to actor endpoint and crawl all the information about a single place (hotel, restaurant) in 15 seconds.
+You can either enter the location and download the data from the dataset or send a synchronous request to the actor endpoint and crawl all the information about a single place (hotel, restaurant) in 15 seconds.
 
-## Output  TripAdvisor Export
-You can extract a variety of data about a single place as well as about a full location including some of the most necessary information such as `email`, `phone`, `price` and `reviews`. It is possible to download data in various formats such as `JSON`, `CSV`, `XML` and others for more reference see the [Apify Docs](https://www.apify.com/docs).
+## Output - TripAdvisor Export
+You can extract a variety of data about a single place as well as about a complete location, including some of the most essential information, such as `email`, `phone`, `price` and `reviews`. Data can be downloaded in various formats, such as `JSON`, `CSV`, `XML` and others. For more details, see the [Apify Docs](https://www.apify.com/docs).
 
 **Here is an example of `JSON` output:**
 
@@ -185,19 +185,19 @@ You can extract a variety of data about a single place as well as about a full l
 }
 ```
 
-## How Does TripAdvisor Scraper Work ? 
-The whole project is made by the web scrapping and automation platform [Apify](https://www.apify.com/) using the [Apify SDK](https://sdk.apify.com/).
+## How does the TripAdvisor Scraper Work ? 
+The whole project was created on the web scraping and automation platform [Apify](https://www.apify.com/) using the [Apify SDK](https://sdk.apify.com/).
 
-## TripAdvisor Scrapper Usage
-If you want to scrape a lot of hotels, restaurants for a given place and write the data to dataset this usage is just for you. Or you can buy [Apify proxy](https://apify.com/proxy/) and be sure you will have the access to TripAdvisor.com all time.
+## TripAdvisor Scraper Usage
+If you want to scrape a lot of hotels and/or restaurants for a given place and write the data to a dataset, the scraper is right for you. If you have problems with accessing TripAdvisor reliably, consider purchasing [Apify proxy](https://apify.com/proxy/) to make sure you enjoy uninterrupted access.
 
 1. __Visit LINK TO Scrapper UI__
 2. __Fill input__
 3. __Click Run__
 
-We made a simple UI to make the interaction smooth. but if you prefer doing things yourself here is an input schema. 
+We created a simple UI to make interaction easy. but if you prefer doing things yourself, here is an input schema. 
 
-Actor accepts the following `JSON` input:
+The actor accepts the following `JSON` input:
 
 ```json
  {
@@ -211,21 +211,21 @@ Actor accepts the following `JSON` input:
  
 |Name|Type|Description|
 |---|---|---|
-|locationFullName |String| Name of location as you would entered to TripAdvisor search - It is assumed that the location is the first of the search results|
+|locationFullName |String| Name of location as you would enter it in TripAdvisor search - it is assumed that the location is the first of the search results|
 |includeRestaurants|Boolean|If true result includes restaurants|
 |includeHotels|Boolean|If true result includes hotels|
 |includeReviews|Boolean|If true result includes reviews for every place found|
 |lastReviewDate|String|Date of last review that is included in results in format `YYYY-MM-DD`|
 
 ## API Usage
-If you want to get information about a single hotel a restaurant and you don't want it in single synchronous API call this usage is just for you.
+If you want to get information about a single hotel or restaurant and you don't want it in a single synchronous API call, the API is right for you.
 
-Beware that it might be impossible to maintain an idle HTTP connection for a long period of time, due to client timeout or network conditions. Make sure your HTTP client is configured to have a long enough connection timeout. If the connection breaks, you will not receive any information about the run and its status. However for a normal place with rasonable amount of reviews (~1000) it should not take more than 20 seconds. You can _paginate_ the reviews using `lastReviewDate` property.
+Be aware that it might be impossible to maintain an idle HTTP connection for a long period of time, due to client timeout or network conditions. Make sure your HTTP client is configured to have a long enough connection timeout. If the connection breaks, you will not receive any information about the run and its status. However for a normal location with a reasonable number of reviews (~1000) it should not take more than 20 seconds. You can _paginate_ the reviews using `lastReviewDate` property.
 
-Here is a link to the part of [Apify docs](https://www.apify.com/docs/api/v2#/reference/actors/run-actor-synchronously/with-input) that covers running actor synchronously. 
+Here is a link to the part of [Apify docs](https://www.apify.com/docs/api/v2#/reference/actors/run-actor-synchronously/with-input) that covers running an actor synchronously. 
 
 ### 1. Input
-To get information about single `hotel` the request body should be in this shape:
+To get information about single `hotel` the request body should be in this format:
 
 ```json
 {
@@ -234,7 +234,7 @@ To get information about single `hotel` the request body should be in this shape
   "lastReviewDate": "2010-01-12"
 }
 ```
-To get information about single `restaurant` the request body should be in this shape:
+To get information about single `restaurant` the request body should be in this format:
 
 ```json
 {
@@ -251,11 +251,11 @@ To get information about single `restaurant` the request body should be in this 
 | lastReviewDate |String|Date of last review that is included in results in format `YYYY-MM-DD`|
 
 ### 2. Output
-The Actor produces output as in data you can get section. 
+The actor produces output as data you can get by section. 
 ## Getting Id of Restaurant or Hotel
 
- 1. Visit the Place Page such as `https://www.tripadvisor.cz/Hotel_Review-g186338-d1657415-Reviews-Park_Plaza_Westminster_Bridge_London-London_England.html`.
+ 1. Visit the Place Page, e.g. `https://www.tripadvisor.cz/Hotel_Review-g186338-d1657415-Reviews-Park_Plaza_Westminster_Bridge_London-London_England.html`.
  2. The id is the number after `-d` in the url. For this url it would be `1657415`.
 
 ### TripAdvisor scraping tutorial
-If you need help and want to see the scraping of TripAdvisor step by step, be sure to check our blogpost [How to Scrape TripAdvisor](https://medium.com/@petrpatekml/c910f75153a9).
+If you need help or want to follow the scraping of TripAdvisor step by step, be sure to check our blogpost [How to Scrape TripAdvisor](https://medium.com/@petrpatekml/c910f75153a9).
