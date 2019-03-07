@@ -1,13 +1,13 @@
-## TripAdvisor API limitations
+# TripAdvisor API limitations
 Since TripAdvisor does not provide a consistent open API for 3rd parties, we at Apify decided to make our own!
 
 # TripAdvisor Scraper
 Get data from TripAdvisor fast and easily. A scraper is now available for restaurants and hotels. It's suitable for such use cases as scraping TripAdvisor reviews, emails, addresses, awards and many more attributes of hotels and restaurants on TripAdvisor.
 
-## Input - TripAdvisor Crawler
+# Input - TripAdvisor Crawler
 You can either enter the location and download the data from the dataset or send a synchronous request to the actor endpoint and crawl all the information about a single place (hotel, restaurant) in 15 seconds.
 
-## Output - TripAdvisor Export
+# Output - TripAdvisor Export
 You can extract a variety of data about a single place as well as about a complete location, including some of the most essential information, such as `email`, `phone`, `price` and `reviews`. Data can be downloaded in various formats, such as `JSON`, `CSV`, `XML` and others. For more details, see the [Apify Docs](https://www.apify.com/docs).
 
 **Here is an example of `JSON` output:**
@@ -185,10 +185,10 @@ You can extract a variety of data about a single place as well as about a comple
 }
 ```
 
-## How does the TripAdvisor Scraper Work ? 
+# How does the TripAdvisor Scraper Work ? 
 The whole project was created on the web scraping and automation platform [Apify](https://www.apify.com/) using the [Apify SDK](https://sdk.apify.com/).
 
-## TripAdvisor Scraper Usage
+# TripAdvisor Scraper Usage
 If you want to scrape a lot of hotels and/or restaurants for a given place and write the data to a dataset, the scraper is right for you. If you have problems with accessing TripAdvisor reliably, consider purchasing [Apify proxy](https://apify.com/proxy/) to make sure you enjoy uninterrupted access.
 
 1. __Visit LINK TO Scrapper UI__
@@ -252,7 +252,7 @@ To get information about single `restaurant` the request body should be in this 
 
 ### 2. Output
 The actor produces output as data you can get by section. 
-## Getting Id of Restaurant or Hotel
+# Getting Id of Restaurant or Hotel
 
  1. Visit the Place Page, e.g. `https://www.tripadvisor.cz/Hotel_Review-g186338-d1657415-Reviews-Park_Plaza_Westminster_Bridge_London-London_England.html`.
  2. The id is the number after `-d` in the url. For this url it would be `1657415`.
