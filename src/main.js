@@ -34,10 +34,12 @@ Apify.main(async () => {
         lastReviewDate = '2010-01-01',
         hotelId,
         restaurantId,
+        checkInDate,
     } = input;
     log.debug('Received input', input);
     global.INCLUDE_REVIEWS = includeReviews;
     global.LAST_REVIEW_DATE = lastReviewDate;
+    global.CHECKIN_DATE = checkInDate;
     // const timeStamp = Date.now();
     let requestList;
     // let restaurants;

@@ -50,6 +50,11 @@
       "type": "string",
       "description": "Id of restaurant",
       "editor": "hidden"
+    },
+    "checkInDate": {
+      "title": "Check in date",
+      "type": "string",
+      "description": "Hotel rooms prices will be calculated for this date"
     }
   },
   "required": ["locationFullName", "includeReviews"]
