@@ -54,7 +54,9 @@
     "checkInDate": {
       "title": "Check in date",
       "type": "string",
-      "description": "Hotel rooms prices will be calculated for this date"
+      "description": "Hotel rooms prices will be calculated for this date",
+      "editor": "textfield"
+
     }
   },
   "required": ["locationFullName", "includeReviews"]
