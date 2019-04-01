@@ -56,7 +56,14 @@
       "type": "string",
       "description": "Hotel rooms prices will be calculated for this date",
       "editor": "textfield"
-
+    },
+    "proxyConfiguration": {
+      "title": "Proxy configuration",
+      "type": "object",
+      "description": "Optionaly use Apify Proxy",
+      "prefill": { "useApifyProxy": true },
+      "default": { "useApifyProxy": true },
+      "editor": "proxy"
     }
   },
   "required": ["locationFullName", "includeReviews"]
