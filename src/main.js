@@ -116,12 +116,14 @@ Apify.main(async () => {
                 const maxOffset = $('.pageNum.taLnk').last().attr('data-offset') || 0;
                 log.info(`Processing restaurants with last data offset: ${maxOffset}`);
                 for (let i = 0; i <= maxOffset; i += 30) {
+                    log.info(`Adding restaurants search page with offset: ${i} to list`);
+
                     promises.push(() => requestQueue.addRequest({
                         url: buildRestaurantUrl(locationId, i.toString()),
                         userData: { restaurantList: true },
                     }));
-                    await randomDelay();
                 }
+                await randomDelay();
                 await resolveInBatches(promises);
             } else if (request.userData.restaurantList) {
                 // Gets ids of restaurants from restaurantList -> gets data for given id and saves restaurant to dataset

@@ -239,8 +239,11 @@ function getRequestListSources(locationId, includeHotesl, includeRestaurants) {
 function getRestaurantIds($) {
     const ids = [];
     $('.listing.rebrand').each((index, element) => {
-        const split = $(element).attr('id').split('_');
-        ids.push(split[split.length - 1]);
+        const id = $(element).attr('id');
+        if (id) {
+            const split = id.split('_');
+            ids.push(split[split.length - 1]);
+        }
     });
     return ids;
 }
