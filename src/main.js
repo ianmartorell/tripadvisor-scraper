@@ -78,7 +78,7 @@ Apify.main(async () => {
         requestQueue,
         useApifyProxy: input.proxyConfiguration ? input.proxyConfiguration.useApifyProxy : true,
         apifyProxyGroups: input.proxyConfiguration ? input.proxyConfiguration.apifyProxyGroups : undefined,
-        apifyProxySession: Math.random(),
+        apifyProxySession: Math.random().toString(10),
         handlePageFunction: async ({ request, $ }) => {
             let client;
 
