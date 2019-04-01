@@ -313,6 +313,7 @@ function validateInput(input) {
         includeHotels,
         includeReviews,
         lastReviewDate,
+        checkInDate,
     } = input;
     const getError = (property, type = 'string') => new Error(`${property} should be a ${type}`);
     const checkStringProperty = (property, propertyName) => {
@@ -323,6 +324,12 @@ function validateInput(input) {
     const checkBooleanProperty = (property, propertyName) => {
         if (property && !check.boolean(property)) {
             throw getError(propertyName, 'boolean');
+        }
+    };
+
+    const checkDateFormat = (date, format = 'YYYY-MM-DD') => {
+        if (moment(date, format).format(format) !== date) {
+            throw new Error(`Date: ${date} should be in format ${format}`);
         }
     };
 
@@ -338,6 +345,10 @@ function validateInput(input) {
     checkBooleanProperty(includeHotels, 'includeHotels');
     checkBooleanProperty(includeReviews, 'includeReviews');
 
+    // dates
+    checkDateFormat(lastReviewDate);
+    checkDateFormat(checkInDate);
+
     // Should have all required fields
     if (!locationFullName && !hotelId && !restaurantId) {
         throw new Error('At least one of properties: locationFullName, hotelId, restaurantId should be set');
@@ -347,6 +358,7 @@ function validateInput(input) {
     }
     log.info('Input validation OK');
 }
+
 
 module.exports = {
     resolveInBatches,

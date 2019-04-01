@@ -54,7 +54,7 @@ async function getLocationId(searchString) {
 }
 
 async function getPlacePrices(placeId, delay) {
-    const dateString = moment().format('YYYY-MM-DD');
+    const dateString = global.CHECKIN_DATE || moment().format('YYYY-MM-DD');
     const response = await axios.get(
         `https://api.tripadvisor.com/api/internal/1.19/en/meta_hac/${placeId}?adults=2&checkin=${dateString}&currency=USD&lod=extended&nights=1`,
         { headers: { 'X-TripAdvisor-API-Key': API_KEY } },
