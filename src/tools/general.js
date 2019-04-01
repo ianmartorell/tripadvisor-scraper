@@ -349,8 +349,12 @@ function validateInput(input) {
     checkBooleanProperty(includeReviews, 'includeReviews');
 
     // dates
-    checkDateFormat(lastReviewDate);
-    checkDateFormat(checkInDate);
+    if (lastReviewDate) {
+        checkDateFormat(lastReviewDate);
+    }
+    if (checkInDate) {
+        checkDateFormat(checkInDate);
+    }
 
     // Should have all required fields
     if (!locationFullName && !hotelId && !restaurantId) {
