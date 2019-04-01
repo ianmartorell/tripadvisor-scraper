@@ -76,11 +76,9 @@ Apify.main(async () => {
     const crawler = new Apify.CheerioCrawler({
         requestList,
         requestQueue,
-        launchPuppeteerOptions: {
-            useApifyProxy: input.proxyConfiguration ? input.proxyConfiguration.useApifyProxy : true,
-            apifyProxyGroups: input.proxyConfiguration ? input.proxyConfiguration.apifyProxyGroups : undefined,
-            apifyProxySession: Math.random(),
-        },
+        useApifyProxy: input.proxyConfiguration ? input.proxyConfiguration.useApifyProxy : true,
+        apifyProxyGroups: input.proxyConfiguration ? input.proxyConfiguration.apifyProxyGroups : undefined,
+        apifyProxySession: Math.random(),
         handlePageFunction: async ({ request, $ }) => {
             let client;
 
