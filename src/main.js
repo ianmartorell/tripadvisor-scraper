@@ -20,8 +20,7 @@ const {
 } = require('./tools/api');
 
 const { utils: { log } } = Apify;
-
-
+let error = 0;
 Apify.main(async () => {
     // Create and initialize an instance of the RequestList class that contains the start URL.
     const input = await Apify.getValue('INPUT');
@@ -153,11 +152,14 @@ Apify.main(async () => {
         },
         handleFailedRequestFunction: async ({ request }) => {
             log.info(`Request ${request.url} failed too many times`);
+            await Apify.setValue(`ERROR-${Date.now()}`, JSON.stringify(request), { contentType: 'application/json' });
+            error += 1;
         },
     });
 
     // Run the crawler and wait for it to finish.
     await crawler.run();
+    log.info(`Requests failed: ${error}`);
 
     log.info('Crawler finished.');
 });
