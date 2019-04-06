@@ -71,7 +71,7 @@ const processReview = (review, remoteId) => {
 
     log.debug(`Processing review: ${title}`);
     if (userProfile) {
-        const { hometown, contributionCounts } = userProfile;
+        const { hometown, contributionCounts = {} } = userProfile;
         const { sumReview } = contributionCounts;
         userContributions = sumReview;
         userLocation = hometown.fallbackString;
@@ -115,9 +115,9 @@ async function getReviews(id, client) {
             log.error('Graphql error', errors);
         }
 
-        const reviewData = resp.data[0].data.locations[0].reviewList;
+        const reviewData = resp.data[0].data.locations[0].reviewList || {};
         const { totalCount } = reviewData;
-        let { reviews } = reviewData;
+        let { reviews = [] } = reviewData;
         const lastIndex = findLastReviewIndex(reviews);
         const shouldSlice = lastIndex >= 0;
         if (shouldSlice) {
@@ -128,7 +128,11 @@ async function getReviews(id, client) {
         log.info(`Going to process ${totalCount} reviews`);
 
         numberOfFetches = Math.ceil(needToFetch / limit);
-        reviews.forEach(review => result.push(processReview(review)));
+
+        if (reviews.length >= 1) {
+            reviews.forEach(review => result.push(processReview(review)));
+        }
+
         if (shouldSlice) return result;
     } catch (e) {
         log.error(e, 'Could not make initial request');
