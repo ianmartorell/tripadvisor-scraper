@@ -28,6 +28,7 @@ Apify.main(async () => {
     validateInput(input);
     const {
         locationFullName,
+        locationId: locationIdInput,
         includeRestaurants = true,
         includeHotels = true,
         includeReviews = true,
@@ -46,17 +47,18 @@ Apify.main(async () => {
     // let hotels;
     const generalDataset = await Apify.openDataset();
     let locationId;
-    if (locationFullName) {
-        // restaurants = await Apify.openDataset(`restaurants-${timeStamp}`);
-        // hotels = await Apify.openDataset(`hotels-${timeStamp}`);
 
-        locationId = await getLocationId(locationFullName);
+    if (locationFullName || locationIdInput) {
+        if (locationIdInput) {
+            locationId = locationIdInput;
+        } else {
+            locationId = await getLocationId(locationFullName);
+        }
         log.info(`Processing locationId: ${locationId}`);
         requestList = new Apify.RequestList({
             sources: getRequestListSources(locationId, includeHotels, includeRestaurants),
         });
     }
-
     if (restaurantId) {
         log.debug(`Processing restaurant ${restaurantId}`);
         requestList = new Apify.RequestList({
