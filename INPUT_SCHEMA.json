@@ -15,7 +15,7 @@
       "title": "Location id",
       "type": "string",
       "description": "Id of location",
-      "default": "274707",
+      "default": "",
       "editor": "hidden"
     },
     "lastReviewDate": {
