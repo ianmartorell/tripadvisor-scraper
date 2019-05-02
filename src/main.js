@@ -1,6 +1,5 @@
 const Apify = require('apify');
 
-process.env.API_KEY = '3c7beec8-846d-4377-be03-71cae6145fdc';
 const {
     getHotelIds,
     resolveInBatches,
