@@ -86,6 +86,28 @@ function buildRestaurantUrl(locationId, offset) {
 function buildHotelUrl(locationId, offset) {
     return `https://www.tripadvisor.com/Hotels-g${locationId}-${offset ? `oa${offset}` : ''}.html`;
 }
+
+function buildAttractionsUrl(locationId) {
+    return `https://www.tripadvisor.com/Attractions-g${locationId}`;
+}
+
+async function callForAttractionList(locationId, limit = 10, offset = 0) {
+    const response = await axios.get(
+        `https://api.tripadvisor.com/api/internal/1.14/location/${locationId}/attractions?limit=${limit}&offset=${offset}`,
+        { headers: { 'X-TripAdvisor-API-Key': API_KEY } },
+    );
+    return response.data;
+}
+
+async function callForAttractionReview(locationId, limit = 10, offset = 0) {
+    const response = await axios.get(
+        `https://api.tripadvisor.com/api/internal/1.14/location/${locationId}/reviews?limit=${limit}&offset=${offset}`,
+        { headers: { 'X-TripAdvisor-API-Key': API_KEY } },
+    );
+    return response.data;
+}
+
+
 module.exports = {
     callForReview,
     getLocationId,
@@ -93,4 +115,7 @@ module.exports = {
     getPlaceInformation,
     buildHotelUrl,
     buildRestaurantUrl,
+    buildAttractionsUrl,
+    callForAttractionList,
+    callForAttractionReview,
 };

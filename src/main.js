@@ -11,6 +11,8 @@ const {
     getClient,
     randomDelay,
     validateInput,
+    getAttractions,
+    processAttraction,
 } = require('./tools/general');
 
 const {
@@ -31,6 +33,7 @@ Apify.main(async () => {
         includeRestaurants = true,
         includeHotels = true,
         includeReviews = true,
+        includeAttractions = true,
         lastReviewDate = '2010-01-01',
         hotelId,
         restaurantId,
@@ -53,7 +56,7 @@ Apify.main(async () => {
         locationId = await getLocationId(locationFullName);
         log.info(`Processing locationId: ${locationId}`);
         requestList = new Apify.RequestList({
-            sources: getRequestListSources(locationId, includeHotels, includeRestaurants),
+            sources: getRequestListSources(locationId, includeHotels, includeRestaurants, includeAttractions),
         });
     }
 
@@ -149,12 +152,20 @@ Apify.main(async () => {
                 log.info(`Processing single API request for hotel with id: ${id}`);
                 client = await getClient();
                 await processHotel(hotelId, client);
+            } else if (request.userData.initialAttraction) {
+                const attractions = await getAttractions(locationId);
+                log.info(`Found ${attractions.length} attractions`);
+                const attractionsWithDetails = await resolveInBatches(attractions.map(attr => () => processAttraction(attr)), 1);
+                await Apify.pushData(attractionsWithDetails);
             }
         },
+
         handleFailedRequestFunction: async ({ request }) => {
             log.info(`Request ${request.url} failed too many times`);
         },
     });
+
+    crawler.basicCrawler.handleRequestTimeoutSecs = (60 * 1000) * 15;
 
     // Run the crawler and wait for it to finish.
     await crawler.run();
