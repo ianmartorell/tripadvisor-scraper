@@ -11,6 +11,13 @@
       "default": "Prague",
       "editor": "textfield"
     },
+    "locationId": {
+      "title": "Location id",
+      "type": "string",
+      "description": "Id of location",
+      "default": "",
+      "editor": "hidden"
+    },
     "lastReviewDate": {
       "title": "Reviews since date",
       "type": "string",
