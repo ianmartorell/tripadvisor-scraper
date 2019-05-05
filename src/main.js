@@ -10,6 +10,8 @@ const {
     getClient,
     randomDelay,
     validateInput,
+    getAttractions,
+    processAttraction,
 } = require('./tools/general');
 
 const {
@@ -30,6 +32,7 @@ Apify.main(async () => {
         includeRestaurants = true,
         includeHotels = true,
         includeReviews = true,
+        includeAttractions = true,
         lastReviewDate = '2010-01-01',
         hotelId,
         restaurantId,
@@ -54,7 +57,7 @@ Apify.main(async () => {
         }
         log.info(`Processing locationId: ${locationId}`);
         requestList = new Apify.RequestList({
-            sources: getRequestListSources(locationId, includeHotels, includeRestaurants),
+            sources: getRequestListSources(locationId, includeHotels, includeRestaurants, includeAttractions),
         });
     }
     if (restaurantId) {
@@ -149,15 +152,24 @@ Apify.main(async () => {
                 log.info(`Processing single API request for hotel with id: ${id}`);
                 client = await getClient();
                 await processHotel(hotelId, client);
+            } else if (request.userData.initialAttraction) {
+                try {
+                    const attractions = await getAttractions(locationId);
+                    log.info(`Found ${attractions.length} attractions`);
+                    const attractionsWithDetails = await resolveInBatches(attractions.map(attr => () => processAttraction(attr)), 20);
+                    await Apify.pushData(attractionsWithDetails);
+                } catch (e) {
+                    log.error(`Could not process attraction... ${e.message}`);
+                }
             }
         },
+        handlePageTimeoutSecs: 60 * 10,
         handleFailedRequestFunction: async ({ request }) => {
             log.info(`Request ${request.url} failed too many times`);
             await Apify.setValue(`ERROR-${Date.now()}`, JSON.stringify(request), { contentType: 'application/json' });
             error += 1;
         },
     });
-
     // Run the crawler and wait for it to finish.
     await crawler.run();
     log.info(`Requests failed: ${error}`);

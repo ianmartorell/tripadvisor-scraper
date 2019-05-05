@@ -205,6 +205,7 @@ The actor accepts the following `JSON` input:
    "includeRestaurants": true,
    "includeHotels": true,
    "includeReviews": true,
+   "includeAttraction": true,
    "lastReviewDate": "2019-01-12"
  }
 ```
@@ -215,6 +216,7 @@ The actor accepts the following `JSON` input:
 |includeRestaurants|Boolean|If true result includes restaurants|
 |includeHotels|Boolean|If true result includes hotels|
 |includeReviews|Boolean|If true result includes reviews for every place found|
+|includeAttractions|Boolean|If true result includes attractions|
 |lastReviewDate|String|Date of last review that is included in results in format `YYYY-MM-DD`|
 
 ## API Usage
