@@ -478,11 +478,13 @@ async function getAttractionDetail(attraction) {
     log.info(`Processing detail for ${attraction.name} attraction`);
     const locationId = attraction.location_id;
     let reviews = [];
-    try {
-        reviews = await getReviewsForAttraction(locationId);
-        log.info(`Got ${reviews.length} reviews for ${attraction.name}`);
-    } catch (e) {
-        log.error(`Could not get reviews for attraction ${attraction.name} due to ${e.message}`);
+    if (global.INCLUDE_REVIEWS) {
+        try {
+            reviews = await getReviewsForAttraction(locationId);
+            log.info(`Got ${reviews.length} reviews for ${attraction.name}`);
+        } catch (e) {
+            log.error(`Could not get reviews for attraction ${attraction.name} due to ${e.message}`);
+        }
     }
 
     attraction.reviews = reviews;
