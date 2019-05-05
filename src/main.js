@@ -153,10 +153,14 @@ Apify.main(async () => {
                 client = await getClient();
                 await processHotel(hotelId, client);
             } else if (request.userData.initialAttraction) {
-                const attractions = await getAttractions(locationId);
-                log.info(`Found ${attractions.length} attractions`);
-                const attractionsWithDetails = await resolveInBatches(attractions.map(attr => () => processAttraction(attr)), 10);
-                await Apify.pushData(attractionsWithDetails);
+                try {
+                    const attractions = await getAttractions(locationId);
+                    log.info(`Found ${attractions.length} attractions`);
+                    const attractionsWithDetails = await resolveInBatches(attractions.map(attr => () => processAttraction(attr)), 20);
+                    await Apify.pushData(attractionsWithDetails);
+                } catch (e) {
+                    log.error(`Could not process attraction... ${e.message}`);
+                }
             }
         },
         handlePageTimeoutSecs: 60 * 10,
