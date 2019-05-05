@@ -213,6 +213,8 @@ async function processHotel(id, client, dataset) {
         amenities: placeInfo.amenities && placeInfo.amenities.map(amenity => amenity.name),
         prices,
         reviews,
+        latitude: placeInfo.latitude,
+        longitude: placeInfo.longitude,
     };
     log.debug('Data for hotel: ', place);
     if (dataset) {
@@ -290,6 +292,8 @@ async function processRestaurant(id, client, dataset) {
         mealTypes: placeInfo.mealTypes && placeInfo.mealTypes.map(m => m.name),
         hours: getHours(placeInfo),
         reviews,
+        latitude: placeInfo.latitude,
+        longitude: placeInfo.longitude,
     };
     log.debug('Data for restaurant: ', place);
 
