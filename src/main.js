@@ -155,18 +155,15 @@ Apify.main(async () => {
             } else if (request.userData.initialAttraction) {
                 const attractions = await getAttractions(locationId);
                 log.info(`Found ${attractions.length} attractions`);
-                const attractionsWithDetails = await resolveInBatches(attractions.map(attr => () => processAttraction(attr)), 1);
+                const attractionsWithDetails = await resolveInBatches(attractions.map(attr => () => processAttraction(attr)), 10);
                 await Apify.pushData(attractionsWithDetails);
             }
         },
-
+        handlePageTimeoutSecs: 60 * 10,
         handleFailedRequestFunction: async ({ request }) => {
             log.info(`Request ${request.url} failed too many times`);
         },
     });
-
-    crawler.basicCrawler.handleRequestTimeoutSecs = (60 * 1000) * 15;
-
     // Run the crawler and wait for it to finish.
     await crawler.run();
 
