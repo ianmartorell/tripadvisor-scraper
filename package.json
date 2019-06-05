@@ -4,17 +4,17 @@
 	"description": "Crawl a number of web pages using headless Chrome and Puppeteer",
 	"main": "index.js",
 	"dependencies": {
-		"apify": "^0.11.0",
+		"apify": "^0.14.15",
 		"axios": "^0.18.0",
 		"check-types": "^8.0.1",
 		"cheerio": "^1.0.0-rc.2",
-		"eslint": "^5.14.0",
-		"eslint-config-airbnb-base": "^13.1.0",
-		"eslint-plugin-import": "^2.16.0",
-		"eslint-plugin-promise": "^4.0.1",
-		"moment": "^2.24.0"
+		"moment": "^2.24.0",
+		"proxy-agent": "^3.1.0"
 	},
-	"devDependencies": {},
+	"devDependencies": {
+		"@petrpatek/eslint-config-apify": "^1.0.0",
+		"eslint": "^5.16.0"
+	},
 	"scripts": {
 		"start": "node index.js",
 		"test": "echo \"Error: no test specified\" && exit 1"

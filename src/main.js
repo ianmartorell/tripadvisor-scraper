@@ -40,6 +40,7 @@ Apify.main(async () => {
     global.INCLUDE_REVIEWS = includeReviews;
     global.LAST_REVIEW_DATE = lastReviewDate;
     global.CHECKIN_DATE = checkInDate;
+    global.PROXY_GROUPS = input.proxyConfiguration && input.proxyConfiguration.apifyProxyGroups;
     // const timeStamp = Date.now();
     let requestList;
     // let restaurants;
