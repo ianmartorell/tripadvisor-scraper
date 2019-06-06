@@ -14,6 +14,8 @@ const {
     callForAttractionList,
     callForAttractionReview,
     getAgentOptions,
+    getReviewTagsForLocation,
+    callForRestaurantList,
 } = require('./api');
 
 const { utils: { log } } = Apify;
@@ -168,7 +170,6 @@ async function getReviews(id, client) {
         }
     } catch (e) {
         log.error(e, 'Could not make additional requests');
-        console.log(response.data[0].data, 'REVIEWDATA');
     }
     return result;
 }
@@ -226,8 +227,16 @@ async function processHotel(id, client, dataset) {
         email: placeInfo.email,
         amenities: placeInfo.amenities.map(amenity => amenity.name),
         prices,
+        latitude: placeInfo.latitude,
+        longitude: placeInfo.longitude,
+        webUrl: placeInfo.web_url,
+        website: placeInfo.website,
         reviews,
     };
+    if (global.INCLUDE_REVIEW_TAGS) {
+        const tags = await getReviewTags(id);
+        place.reviewTags = tags;
+    }
     log.debug('Data for hotel: ', place);
     if (dataset) {
         await dataset.pushData(place);
@@ -311,8 +320,18 @@ async function processRestaurant(id, client, dataset) {
         cuisine: placeInfo.cuisine.map(cuisine => cuisine.name),
         mealTypes: placeInfo.mealTypes && placeInfo.mealTypes.map(m => m.name),
         hours: getHours(placeInfo),
+        latitude: placeInfo.latitude,
+        longitude: placeInfo.longitude,
+        webUrl: placeInfo.web_url,
+        website: placeInfo.website,
+        numberOfReviews: placeInfo.num_reviews,
+        rankingDenominator: placeInfo.ranking_denominator,
         reviews,
     };
+    if (global.INCLUDE_REVIEW_TAGS) {
+        const tags = await getReviewTags(id);
+        place.reviewTags = tags;
+    }
     log.debug('Data for restaurant: ', place);
 
     if (dataset) {
@@ -323,7 +342,7 @@ async function processRestaurant(id, client, dataset) {
 }
 
 async function getClient() {
-    const response = await axios.get('https://www.tripadvisor.com/', getAgentOptions(groups));
+    const response = await axios.get('https://www.tripadvisor.com/', getAgentOptions());
     const $ = cheerio.load(response.data);
     return axios.create({
         baseURL: 'https://www.tripadvisor.co.uk/data/graphql',
@@ -331,7 +350,7 @@ async function getClient() {
             'x-requested-by': getSecurityToken($),
             Cookie: getCookies(response),
         },
-        ...getAgentOptions(groups),
+        ...getAgentOptions(),
     });
 }
 function validateInput(input) {
@@ -412,6 +431,44 @@ async function getAttractions(locationId) {
         }
     }
     return attractions;
+}
+
+async function getReviewTags(locationId) {
+    let tags = [];
+    let offset = 0;
+    const limit = 20;
+    const data = await getReviewTagsForLocation(locationId, limit);
+    tags = tags.concat(data.data);
+    if (data.paging && data.paging.next) {
+        const totalResults = data.paging.total_results;
+        const numberOfRuns = Math.ceil(totalResults / limit);
+        log.info(`Going to process ${numberOfRuns} pages of attractions`);
+        for (let i = 0; i <= numberOfRuns; i++) {
+            offset += limit;
+            const data2 = await getReviewTagsForLocation(locationId, limit, offset);
+            tags = tags.concat(data2.data);
+        }
+    }
+    return tags;
+}
+
+async function getRestaurants(locationId) {
+    let tags = [];
+    let offset = 0;
+    const limit = 20;
+    const data = await callForRestaurantList(locationId, limit);
+    tags = tags.concat(data.data);
+    if (data.paging && data.paging.next) {
+        const totalResults = data.paging.total_results;
+        const numberOfRuns = Math.ceil(totalResults / limit);
+        log.info(`Going to process ${numberOfRuns} pages of attractions`);
+        for (let i = 0; i <= numberOfRuns; i++) {
+            offset += limit;
+            const data2 = await callForRestaurantList(locationId, limit, offset);
+            tags = tags.concat(data2.data);
+        }
+    }
+    return tags;
 }
 
 function processAttractionReview(review) {
@@ -495,6 +552,8 @@ async function getAttractionDetail(attraction) {
 
 async function processAttraction(attraction) {
     const attr = await getAttractionDetail(attraction);
+    if (global.includeTagsInReviews) {
+    }
     return Apify.pushData(attr);
 }
 

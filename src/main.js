@@ -37,19 +37,18 @@ Apify.main(async () => {
         checkInDate,
     } = input;
     log.debug('Received input', input);
+    // set up global configuration
     global.INCLUDE_REVIEWS = includeReviews;
     global.LAST_REVIEW_DATE = lastReviewDate;
     global.CHECKIN_DATE = checkInDate;
     global.PROXY_GROUPS = input.proxyConfiguration && input.proxyConfiguration.apifyProxyGroups;
-    // const timeStamp = Date.now();
+    global.LANGUAGE = input.language || 'en_USA';
+    global.INCLUDE_REVIEW_TAGS = input.includeReviewTags;
+
     let requestList;
-    // let restaurants;
-    // let hotels;
     const generalDataset = await Apify.openDataset();
     let locationId;
     if (locationFullName) {
-        // restaurants = await Apify.openDataset(`restaurants-${timeStamp}`);
-        // hotels = await Apify.openDataset(`hotels-${timeStamp}`);
 
         locationId = await getLocationId(locationFullName);
         log.info(`Processing locationId: ${locationId}`);
@@ -77,9 +76,12 @@ Apify.main(async () => {
     const crawler = new Apify.CheerioCrawler({
         requestList,
         requestQueue,
+        minConcurrency: 5,
+        maxConcurrency: 10,
         useApifyProxy: input.proxyConfiguration ? input.proxyConfiguration.useApifyProxy : true,
         apifyProxyGroups: input.proxyConfiguration ? input.proxyConfiguration.apifyProxyGroups : undefined,
         apifyProxySession: Math.random().toString(10),
+        handlePageTimeoutSecs: 120,
         handlePageFunction: async ({ request, $ }) => {
             let client;
 

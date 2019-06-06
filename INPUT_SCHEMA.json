@@ -39,6 +39,12 @@
       "description": "If checked results includes reviews data",
       "default": false
     },
+    "includeReviewTags": {
+      "title": "Include tags for reviews",
+      "type": "boolean",
+      "description": "If checked results includes tags for reviews",
+      "default": false
+    },
     "hotelId": {
       "title": "Hotel id",
       "type": "string",
