@@ -241,7 +241,7 @@ async function processHotel(placeInfo, client, dataset) {
 }
 
 
-function getRequestListSources(locationId, includeHotesl, includeRestaurants, includeAttractions) {
+function getRequestListSources(locationId, includeHotels, includeRestaurants, includeAttractions) {
     const sources = [];
     if (includeHotels) {
         sources.push({
