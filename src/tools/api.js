@@ -105,6 +105,28 @@ function buildAttractionsUrl(locationId) {
 
 async function callForAttractionList(locationId, limit = 10, offset = 0) {
     const response = await axios.get(
+        `https://api.tripadvisor.com/api/internal/1.14/location/${locationId}/attractions?limit=${limit}&offset=${offset}`,
+        { headers: { 'X-TripAdvisor-API-Key': API_KEY } },
+    );
+    return response.data;
+}
+
+async function callForAttractionReview(locationId, limit = 10, offset = 0) {
+    const response = await axios.get(
+        `https://api.tripadvisor.com/api/internal/1.14/location/${locationId}/reviews?limit=${limit}&offset=${offset}`,
+        { headers: { 'X-TripAdvisor-API-Key': API_KEY } },
+    );
+    return response.data;
+}
+
+
+
+function buildAttractionsUrl(locationId) {
+    return `https://www.tripadvisor.com/Attractions-g${locationId}`;
+}
+
+async function callForAttractionList(locationId, limit = 10, offset = 0) {
+    const response = await axios.get(
         `https://api.tripadvisor.com/api/internal/1.14/location/${locationId}/attractions?limit=${limit}&offset=${offset}&lang=${global.LANGUAGE}`,
         { headers: { 'X-TripAdvisor-API-Key': API_KEY }, ...getAgentOptions() },
     );
@@ -170,11 +192,11 @@ module.exports = {
     getPlaceInformation,
     buildHotelUrl,
     buildRestaurantUrl,
-    buildAttractionsUrl,
-    callForAttractionList,
-    callForAttractionReview,
     getAgentOptions,
     getReviewTagsForLocation,
     callForRestaurantList,
     callForHotelList,
+    buildAttractionsUrl,
+    callForAttractionList,
+    callForAttractionReview,
 };

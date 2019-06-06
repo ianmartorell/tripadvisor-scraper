@@ -30,16 +30,17 @@ Apify.main(async () => {
     validateInput(input);
     const {
         locationFullName,
+        locationId: locationIdInput,
         includeRestaurants = true,
         includeHotels = true,
         includeReviews = true,
+        includeAttractions = true,
         lastReviewDate = '2010-01-01',
         hotelId,
         restaurantId,
         checkInDate,
     } = input;
     log.debug('Received input', input);
-    // set up global configuration
     global.INCLUDE_REVIEWS = includeReviews;
     global.LAST_REVIEW_DATE = lastReviewDate;
     global.CHECKIN_DATE = checkInDate;
@@ -50,14 +51,18 @@ Apify.main(async () => {
     let requestList;
     const generalDataset = await Apify.openDataset();
     let locationId;
-    if (locationFullName) {
-        locationId = await getLocationId(locationFullName);
+
+    if (locationFullName || locationIdInput) {
+        if (locationIdInput) {
+            locationId = locationIdInput;
+        } else {
+            locationId = await getLocationId(locationFullName);
+        }
         log.info(`Processing locationId: ${locationId}`);
         requestList = new Apify.RequestList({
-            sources: getRequestListSources(locationId, includeHotels, includeRestaurants),
+            sources: getRequestListSources(locationId, includeHotels, includeRestaurants, includeAttractions),
         });
     }
-
     if (restaurantId) {
         log.debug(`Processing restaurant ${restaurantId}`);
         requestList = new Apify.RequestList({
@@ -150,15 +155,27 @@ Apify.main(async () => {
                 log.info(`Processing single API request for hotel with id: ${id}`);
                 client = await getClient();
                 await processHotel(hotelId, client);
+            } else if (request.userData.initialAttraction) {
+                try {
+                    const attractions = await getAttractions(locationId);
+                    log.info(`Found ${attractions.length} attractions`);
+                    const attractionsWithDetails = await resolveInBatches(attractions.map(attr => () => processAttraction(attr)), 20);
+                    await Apify.pushData(attractionsWithDetails);
+                } catch (e) {
+                    log.error(`Could not process attraction... ${e.message}`);
+                }
             }
         },
+        handlePageTimeoutSecs: 60 * 10,
         handleFailedRequestFunction: async ({ request }) => {
             log.info(`Request ${request.url} failed too many times`);
+            await Apify.setValue(`ERROR-${Date.now()}`, JSON.stringify(request), { contentType: 'application/json' });
+            error += 1;
         },
     });
-
     // Run the crawler and wait for it to finish.
     await crawler.run();
+    log.info(`Requests failed: ${error}`);
 
     log.info('Crawler finished.');
 });

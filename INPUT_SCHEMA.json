@@ -11,6 +11,13 @@
       "default": "Prague",
       "editor": "textfield"
     },
+    "locationId": {
+      "title": "Location id",
+      "type": "string",
+      "description": "Id of location",
+      "default": "",
+      "editor": "hidden"
+    },
     "lastReviewDate": {
       "title": "Reviews since date",
       "type": "string",
@@ -23,6 +30,14 @@
       "title": "Include restaurants",
       "type": "boolean",
       "description": "If checked results includes restaurants for given location.",
+      "default": true,
+      "groupCaption": "Options",
+      "groupDescription": "Information that will be included"
+    },
+    "includeAttractions": {
+      "title": "Include things to do [BETA]",
+      "type": "boolean",
+      "description": "If checked results includes things to do for given location.",
       "default": true,
       "groupCaption": "Options",
       "groupDescription": "Information that will be included"
