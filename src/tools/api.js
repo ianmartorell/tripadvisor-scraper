@@ -5,6 +5,7 @@ const Apify = require('apify');
 const ProxyAgent = require('proxy-agent');
 
 const { ReviewQuery } = require('./graphql-queries');
+const { LIMIT } = require('../constants');
 
 const { API_KEY } = process.env;
 
@@ -52,6 +53,7 @@ async function getLocationId(searchString) {
     } catch (e) {
         error = e;
     }
+    console.log(error)
     const { data } = result.data;
 
     if (!data || error) {
@@ -117,18 +119,26 @@ async function callForAttractionReview(locationId, limit = 10, offset = 0) {
     return response.data;
 }
 
-async function getReviewTagsForLocation(locationId, limit = 20, offset = 0) {
+async function getReviewTagsForLocation(locationId, limit = LIMIT, offset = 0) {
     const response = await axios.get(
         `https://api.tripadvisor.com/api/internal/1.14/location/${locationId}/keywords?currency=CZK&lang=${global.LANGUAGE}&limit=${limit}&offset=${offset}`,
         { headers: { 'X-TripAdvisor-API-Key': API_KEY }, ...getAgentOptions() },
     );
-    console.log(response.data, 'TAGS');
     return response.data;
 }
 
-async function callForRestaurantList(locationId, limit = 20, offset = 0) {
+async function callForRestaurantList(locationId, limit = LIMIT, offset = 0) {
     const response = await axios.get(
         `https://api.tripadvisor.com/api/internal/1.14/location/${locationId}/restaurants?currency=CZK&lang=${global.LANGUAGE}&limit=${limit}&offset=${offset}`,
+        { headers: { 'X-TripAdvisor-API-Key': API_KEY }, ...getAgentOptions() },
+    );
+
+    return response.data;
+}
+
+async function callForHotelList(locationId, limit = LIMIT, offset = 0) {
+    const response = await axios.get(
+        `https://api.tripadvisor.com/api/internal/1.14/location/${locationId}/hotels?currency=CZK&lang=${global.LANGUAGE}&limit=${limit}&offset=${offset}`,
         { headers: { 'X-TripAdvisor-API-Key': API_KEY }, ...getAgentOptions() },
     );
 
@@ -166,4 +176,5 @@ module.exports = {
     getAgentOptions,
     getReviewTagsForLocation,
     callForRestaurantList,
+    callForHotelList,
 };

@@ -174,9 +174,17 @@ async function getReviews(id, client) {
     return result;
 }
 
-async function getPlaceInfoAndReview(id, client) {
-    let placeInfo;
+async function processHotel(placeInfo, client, dataset) {
+    const { location_id: id } = placeInfo;
     let reviews = [];
+    let placePrices;
+
+    try {
+        placePrices = await getPlacePrices(id, randomDelay);
+    } catch (e) {
+        log.warning('Hotels: Could not get place prices', { errorMessage: e.message });
+    }
+
     if (global.INCLUDE_REVIEWS) {
         try {
             reviews = await getReviews(id, client);
@@ -185,24 +193,7 @@ async function getPlaceInfoAndReview(id, client) {
         }
     }
 
-    try {
-        placeInfo = await getPlaceInformation(id);
-    } catch (e) {
-        log.error('Could not get place info', e);
-    }
-    return { placeInfo, reviews };
-}
-
-async function processHotel(id, client, dataset) {
-    let placePrices;
-    const { reviews, placeInfo } = await getPlaceInfoAndReview(id, client);
-    try {
-        placePrices = await getPlacePrices(id, randomDelay);
-    } catch (e) {
-        log.warning('Hotels: Could not get place prices', { errorMessage: e.message });
-    }
-
-    if (!placeInfo || !reviews) {
+    if (!placeInfo) {
         return;
     }
     const prices = placePrices ? placePrices.offers.map(offer => ({
@@ -298,8 +289,16 @@ function getHours(placeInfo) {
 }
 
 
-async function processRestaurant(id, client, dataset) {
-    const { reviews, placeInfo } = await getPlaceInfoAndReview(id, client);
+async function processRestaurant(placeInfo, client, dataset) {
+    const { location_id: id } = placeInfo;
+    let reviews = [];
+    if (global.INCLUDE_REVIEWS) {
+        try {
+            reviews = await getReviews(id, client);
+        } catch (e) {
+            log.error('Could not get reviews', e);
+        }
+    }
     if (!placeInfo) {
         return;
     }
@@ -442,7 +441,7 @@ async function getReviewTags(locationId) {
     if (data.paging && data.paging.next) {
         const totalResults = data.paging.total_results;
         const numberOfRuns = Math.ceil(totalResults / limit);
-        log.info(`Going to process ${numberOfRuns} pages of attractions`);
+        log.info(`Going to process ${numberOfRuns} pages of ReviewTags, ${data.paging}`);
         for (let i = 0; i <= numberOfRuns; i++) {
             offset += limit;
             const data2 = await getReviewTagsForLocation(locationId, limit, offset);
@@ -451,26 +450,6 @@ async function getReviewTags(locationId) {
     }
     return tags;
 }
-
-async function getRestaurants(locationId) {
-    let tags = [];
-    let offset = 0;
-    const limit = 20;
-    const data = await callForRestaurantList(locationId, limit);
-    tags = tags.concat(data.data);
-    if (data.paging && data.paging.next) {
-        const totalResults = data.paging.total_results;
-        const numberOfRuns = Math.ceil(totalResults / limit);
-        log.info(`Going to process ${numberOfRuns} pages of attractions`);
-        for (let i = 0; i <= numberOfRuns; i++) {
-            offset += limit;
-            const data2 = await callForRestaurantList(locationId, limit, offset);
-            tags = tags.concat(data2.data);
-        }
-    }
-    return tags;
-}
-
 function processAttractionReview(review) {
     const {
         lang,
