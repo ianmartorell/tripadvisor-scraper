@@ -38,7 +38,7 @@
       "title": "Include things to do [BETA]",
       "type": "boolean",
       "description": "If checked results includes things to do for given location.",
-      "default": true,
+      "default": false,
       "groupCaption": "Options",
       "groupDescription": "Information that will be included"
     },

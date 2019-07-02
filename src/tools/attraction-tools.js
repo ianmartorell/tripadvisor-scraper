@@ -1,9 +1,27 @@
-const {
-    callForAttractionReview,
-} = require('./api');
-const {
-    findLastReviewIndex,
-} = require('./general');
+const Apify = require('apify');
+
+const { utils: { log } } = Apify;
+const { callForAttractionList, callForAttractionReview } = require('./api');
+const { findLastReviewIndex } = require('./general');
+
+async function getAttractions(locationId) {
+    let attractions = [];
+    let offset = 0;
+    const limit = 20;
+    const data = await callForAttractionList(locationId, limit);
+    attractions = attractions.concat(data.data);
+    if (data.paging && data.paging.next) {
+        const totalResults = data.paging.total_results;
+        const numberOfRuns = Math.ceil(totalResults / limit);
+        log.info(`Going to process ${numberOfRuns} pages of attractions`);
+        for (let i = 0; i <= numberOfRuns; i++) {
+            offset += limit;
+            const data2 = await callForAttractionList(locationId, limit, offset);
+            attractions = attractions.concat(data2.data);
+        }
+    }
+    return attractions;
+}
 
 function processAttractionReview(review) {
     const {
@@ -86,11 +104,10 @@ async function getAttractionDetail(attraction) {
 
 async function processAttraction(attraction) {
     const attr = await getAttractionDetail(attraction);
-    if (global.includeTagsInReviews) {
-    }
     return Apify.pushData(attr);
 }
 
 module.exports = {
-
+    processAttraction,
+    getAttractions,
 };

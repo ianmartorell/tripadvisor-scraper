@@ -119,28 +119,6 @@ async function callForAttractionReview(locationId, limit = 10, offset = 0) {
     return response.data;
 }
 
-
-
-function buildAttractionsUrl(locationId) {
-    return `https://www.tripadvisor.com/Attractions-g${locationId}`;
-}
-
-async function callForAttractionList(locationId, limit = 10, offset = 0) {
-    const response = await axios.get(
-        `https://api.tripadvisor.com/api/internal/1.14/location/${locationId}/attractions?limit=${limit}&offset=${offset}&lang=${global.LANGUAGE}`,
-        { headers: { 'X-TripAdvisor-API-Key': API_KEY }, ...getAgentOptions() },
-    );
-    return response.data;
-}
-
-async function callForAttractionReview(locationId, limit = 10, offset = 0) {
-    const response = await axios.get(
-        `https://api.tripadvisor.com/api/internal/1.14/location/${locationId}/reviews?limit=${limit}&offset=${offset}&lang=${global.LANGUAGE}`,
-        { headers: { 'X-TripAdvisor-API-Key': API_KEY }, ...getAgentOptions() },
-    );
-    return response.data;
-}
-
 async function getReviewTagsForLocation(locationId, limit = LIMIT, offset = 0) {
     const response = await axios.get(
         `https://api.tripadvisor.com/api/internal/1.14/location/${locationId}/keywords?currency=CZK&lang=${global.LANGUAGE}&limit=${limit}&offset=${offset}`,

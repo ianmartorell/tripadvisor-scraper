@@ -3,13 +3,15 @@ const Apify = require('apify');
 process.env.API_KEY = '3c7beec8-846d-4377-be03-71cae6145fdc';
 const {
     resolveInBatches,
-    processHotel,
     getRequestListSources,
-    processRestaurant,
     getClient,
     randomDelay,
     validateInput,
 } = require('./tools/general');
+
+const { processRestaurant } = require('./tools/restaurant-tools');
+const { processHotel } = require('./tools/hotel-tools');
+const { processAttraction, getAttractions } = require('./tools/attraction-tools');
 
 const {
     getLocationId,
@@ -27,6 +29,7 @@ const { utils: { log } } = Apify;
 Apify.main(async () => {
     // Create and initialize an instance of the RequestList class that contains the start URL.
     const input = await Apify.getValue('INPUT');
+    let error = 0;
     validateInput(input);
     const {
         locationFullName,
@@ -83,30 +86,31 @@ Apify.main(async () => {
         requestList,
         requestQueue,
         minConcurrency: 10,
+        maxConcurrency: 20,
         handleRequestTimeoutSecs: 180,
-        handleRequestFunction: async ({ request, $ }) => {
+        handleRequestFunction: async ({ request }) => {
             let client;
 
             if (request.userData.initialHotel) {
                 // Process initial hotelList url and add others with pagination to request queue
                 const initialRequest = await callForHotelList(locationId);
                 const maxOffset = initialRequest.paging.total_results;
-                console.log(maxOffset, 'Number of hotels');
+                log.info(maxOffset, 'Number of hotels');
                 log.info(`Processing hotels with last data offset: ${maxOffset}`);
                 const promises = [];
                 for (let i = 0; i <= maxOffset; i += LIMIT) {
                     promises.push(() => requestQueue.addRequest({
-                        url: buildHotelUrl(locationId, i.toString()),
+                        url: `https://api.tripadvisor.com/api/internal/1.14/location/${locationId}/hotels?currency=CZK&lang=${global.LANGUAGE}&limit=${LIMIT}&offset=${i}`,
                         userData: { hotelList: true, offset: i, limit: LIMIT },
                     }));
                     log.debug(`Adding location with ID: ${locationId} Offset: ${i.toString()}`);
-                    await randomDelay();
                 }
                 await resolveInBatches(promises);
             } else if (request.userData.hotelList) {
                 // Gets ids of hotels from hotelList -> gets data for given id and saves hotel to dataset
                 try {
-                    log.info('Processing hotel list ', request.url);
+                    log.info(`Processing hotel list with offset ${request.userData.offset}`);
+                    client = await getClient();
                     const hotelList = await callForHotelList(locationId, request.userData.limit, request.userData.offset);
                     await resolveInBatches(hotelList.data.map((hotel) => {
                         log.debug(`Processing hotel: ${hotel.name}`);
@@ -121,7 +125,7 @@ Apify.main(async () => {
                 const promises = [];
                 const initialRequest = await callForRestaurantList(locationId);
                 const maxOffset = initialRequest.paging.total_results;
-                console.log(maxOffset, 'Number of Restaurants');
+                log.info(maxOffset, 'Number of Restaurants');
                 log.info(`Processing restaurants with last data offset: ${maxOffset}`);
                 for (let i = 0; i <= maxOffset; i += LIMIT) {
                     log.info(`Adding restaurants search page with offset: ${i} to list`);
@@ -136,6 +140,7 @@ Apify.main(async () => {
             } else if (request.userData.restaurantList) {
                 log.info(`Processing restaurant list with offset ${request.userData.offset}`);
                 const restaurantList = await callForRestaurantList(locationId, request.userData.limit, request.userData.offset);
+                client = await getClient();
                 await resolveInBatches(restaurantList.data.map((restaurant) => {
                     log.debug(`Processing restaurant: ${restaurant.name}`);
 
@@ -166,7 +171,6 @@ Apify.main(async () => {
                 }
             }
         },
-        handlePageTimeoutSecs: 60 * 10,
         handleFailedRequestFunction: async ({ request }) => {
             log.info(`Request ${request.url} failed too many times`);
             await Apify.setValue(`ERROR-${Date.now()}`, JSON.stringify(request), { contentType: 'application/json' });
