@@ -1,7 +1,11 @@
 const querystring = require('querystring');
 const axios = require('axios');
 const moment = require('moment');
+const Apify = require('apify');
+const ProxyAgent = require('proxy-agent');
+
 const { ReviewQuery } = require('./graphql-queries');
+const { LIMIT } = require('../constants');
 
 const { API_KEY } = process.env;
 
@@ -38,13 +42,18 @@ async function getLocationId(searchString) {
     let result;
     try {
         result = await axios.post(
-            `https://api.tripadvisor.com/api/internal/1.14/typeahead?${queryString}`,
+            `https://api.tripadvisor.com/api/internal/1.14/typeahead?${queryString}&lang=${global.LANGUAGE}`,
             {},
-            { headers: { 'X-TripAdvisor-API-Key': API_KEY } },
+            {
+                headers: {
+                    'X-TripAdvisor-API-Key': API_KEY,
+                },
+                ...getAgentOptions() },
         );
     } catch (e) {
         error = e;
     }
+    console.log(error)
     const { data } = result.data;
 
     if (!data || error) {
@@ -56,8 +65,11 @@ async function getLocationId(searchString) {
 async function getPlacePrices(placeId, delay) {
     const dateString = global.CHECKIN_DATE || moment().format('YYYY-MM-DD');
     const response = await axios.get(
-        `https://api.tripadvisor.com/api/internal/1.19/en/meta_hac/${placeId}?adults=2&checkin=${dateString}&currency=USD&lod=extended&nights=1`,
-        { headers: { 'X-TripAdvisor-API-Key': API_KEY } },
+        `https://api.tripadvisor.com/api/internal/1.19/en/meta_hac/${placeId}?adults=2&checkin=${dateString}&currency=USD&lod=extended&nights=1&lang=${global.LANGUAGE}`,
+        {
+            headers: { 'X-TripAdvisor-API-Key': API_KEY },
+            ...getAgentOptions(),
+        },
     );
     const offers = response.data.data[0].hac_offers;
     const isLoaded = offers && offers.availability && offers.availability !== 'pending';
@@ -72,11 +84,11 @@ async function getPlacePrices(placeId, delay) {
 }
 
 async function getPlaceInformation(placeId) {
-    const response = await axios.get(
-        `https://api.tripadvisor.com/api/internal/1.14/location/${placeId}`,
-        { headers: { 'X-TripAdvisor-API-Key': API_KEY } },
+    const { data } = await axios.get(
+        `https://api.tripadvisor.com/api/internal/1.14/location/${placeId}?&lang=${global.LANGUAGE}`,
+        { headers: { 'X-TripAdvisor-API-Key': API_KEY }, ...getAgentOptions() },
     );
-    return response.data;
+    return data;
 }
 
 function buildRestaurantUrl(locationId, offset) {
@@ -107,6 +119,49 @@ async function callForAttractionReview(locationId, limit = 10, offset = 0) {
     return response.data;
 }
 
+async function getReviewTagsForLocation(locationId, limit = LIMIT, offset = 0) {
+    const response = await axios.get(
+        `https://api.tripadvisor.com/api/internal/1.14/location/${locationId}/keywords?currency=CZK&lang=${global.LANGUAGE}&limit=${limit}&offset=${offset}`,
+        { headers: { 'X-TripAdvisor-API-Key': API_KEY }, ...getAgentOptions() },
+    );
+    return response.data;
+}
+
+async function callForRestaurantList(locationId, limit = LIMIT, offset = 0) {
+    const response = await axios.get(
+        `https://api.tripadvisor.com/api/internal/1.14/location/${locationId}/restaurants?currency=CZK&lang=${global.LANGUAGE}&limit=${limit}&offset=${offset}`,
+        { headers: { 'X-TripAdvisor-API-Key': API_KEY }, ...getAgentOptions() },
+    );
+
+    return response.data;
+}
+
+async function callForHotelList(locationId, limit = LIMIT, offset = 0) {
+    const response = await axios.get(
+        `https://api.tripadvisor.com/api/internal/1.14/location/${locationId}/hotels?currency=CZK&lang=${global.LANGUAGE}&limit=${limit}&offset=${offset}`,
+        { headers: { 'X-TripAdvisor-API-Key': API_KEY }, ...getAgentOptions() },
+    );
+
+    return response.data;
+}
+
+
+function getAgentOptions() {
+    if (!global.PROXY_GROUPS) {
+        return {};
+    }
+    const proxyUrl = Apify.getApifyProxyUrl({
+        password: process.env.APIFY_PROXY_PASSWORD,
+        groups: global.PROXY_GROUPS,
+        session: `tripadvisor_${Math.random() * 1000000}`,
+    });
+    const agent = new ProxyAgent(proxyUrl);
+    return {
+        httpsAgent: agent,
+        httpAgent: agent,
+    };
+}
+
 
 module.exports = {
     callForReview,
@@ -115,6 +170,10 @@ module.exports = {
     getPlaceInformation,
     buildHotelUrl,
     buildRestaurantUrl,
+    getAgentOptions,
+    getReviewTagsForLocation,
+    callForRestaurantList,
+    callForHotelList,
     buildAttractionsUrl,
     callForAttractionList,
     callForAttractionReview,

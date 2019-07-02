@@ -37,10 +37,8 @@
     "includeAttractions": {
       "title": "Include things to do [BETA]",
       "type": "boolean",
-      "description": "If checked results includes things to do for given location.",
-      "default": true,
-      "groupCaption": "Options",
-      "groupDescription": "Information that will be included"
+      "description": "If checked results includes hotels for given location.",
+      "default": false
     },
     "includeHotels": {
       "title": "Include Hotels",
