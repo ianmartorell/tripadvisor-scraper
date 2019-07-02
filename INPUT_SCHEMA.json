@@ -37,10 +37,8 @@
     "includeAttractions": {
       "title": "Include things to do [BETA]",
       "type": "boolean",
-      "description": "If checked results includes things to do for given location.",
-      "default": false,
-      "groupCaption": "Options",
-      "groupDescription": "Information that will be included"
+      "description": "If checked results includes hotels for given location.",
+      "default": false
     },
     "includeHotels": {
       "title": "Include Hotels",
@@ -52,12 +50,6 @@
       "title": "Include reviews",
       "type": "boolean",
       "description": "If checked results includes reviews data",
-      "default": false
-    },
-    "includeReviewTags": {
-      "title": "Include tags for reviews",
-      "type": "boolean",
-      "description": "If checked results includes tags for reviews",
       "default": false
     },
     "hotelId": {

@@ -49,7 +49,6 @@ Apify.main(async () => {
     global.CHECKIN_DATE = checkInDate;
     global.PROXY_GROUPS = input.proxyConfiguration && input.proxyConfiguration.apifyProxyGroups;
     global.LANGUAGE = input.language || 'en_USA';
-    global.INCLUDE_REVIEW_TAGS = input.includeReviewTags;
 
     let requestList;
     const generalDataset = await Apify.openDataset();
