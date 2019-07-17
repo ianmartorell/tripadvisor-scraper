@@ -54,6 +54,7 @@ async function processRestaurant(placeInfo, client, dataset) {
         website: placeInfo.website,
         numberOfReviews: placeInfo.num_reviews,
         rankingDenominator: placeInfo.ranking_denominator,
+        rankingString: placeInfo.ranking,
         reviews,
     };
     if (global.INCLUDE_REVIEW_TAGS) {
