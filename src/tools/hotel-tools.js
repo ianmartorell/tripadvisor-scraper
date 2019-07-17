@@ -53,6 +53,9 @@ async function processHotel(placeInfo, client, dataset) {
         longitude: placeInfo.longitude,
         webUrl: placeInfo.web_url,
         website: placeInfo.website,
+        rankingString: placeInfo.ranking,
+        numberOfReviews: placeInfo.num_reviews,
+        rankingDenominator: placeInfo.ranking_denominator,
         reviews,
     };
     if (global.INCLUDE_REVIEW_TAGS) {
