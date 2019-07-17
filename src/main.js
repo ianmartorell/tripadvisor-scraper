@@ -16,7 +16,7 @@ const { processAttraction, getAttractions } = require('./tools/attraction-tools'
 const {
     getLocationId,
     buildRestaurantUrl,
-    buildHotelUrl,
+    getPlaceInformation,
     callForRestaurantList,
     callForHotelList,
 } = require('./tools/api');
@@ -151,14 +151,14 @@ Apify.main(async () => {
                 const { restaurantId: id } = request.userData;
                 log.info(`Processing single API request for restaurant with id: ${id}`);
                 client = await getClient();
-                await processRestaurant(restaurantId, client);
+                await processRestaurant(await getPlaceInformation(restaurantId), client);
             } else if (request.userData.hotelDetail) {
                 // For API usage only gets hotelId from input and sets OUTPUT.json to key-value store
                 //  a.k.a. returns response with hotel data
                 const { hotelId: id } = request.userData;
                 log.info(`Processing single API request for hotel with id: ${id}`);
                 client = await getClient();
-                await processHotel(hotelId, client);
+                await processHotel(await getPlaceInformation(hotelId), client);
             } else if (request.userData.initialAttraction) {
                 try {
                     const attractions = await getAttractions(locationId);
