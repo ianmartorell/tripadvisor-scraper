@@ -92,6 +92,7 @@ const processReview = (review, remoteId) => {
 
     return {
         language,
+        originalLanguage,
         remoteId,
         userProfile: {
             route: userProfile.route,
