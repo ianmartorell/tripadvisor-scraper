@@ -61,7 +61,19 @@ async function resolveInBatches(promiseArray, batchLength = 10) {
 }
 
 const processReview = (review, remoteId) => {
-    const { text, title, rating, tripInfo, publishedDate, userProfile } = review;
+    const {
+  url,
+  location,
+  createdDate,
+  publishedDate,
+  language,
+  originalLanguage,
+  text,
+  title,
+  rating,
+  tripInfo,
+  userProfile
+} = review;
     const stayDate = tripInfo ? tripInfo.stayDate : null;
     let userLocation = null;
     let userContributions = null;
@@ -79,14 +91,14 @@ const processReview = (review, remoteId) => {
     }
 
     return {
-        text,
-        title,
-        rating,
-        stayDate,
-        publishedDate,
-        userLocation,
-        userContributions,
+        language,
         remoteId,
+        userProfile: {
+            route: userProfile.route,
+            username: userProfile.username,
+            hometown: userProfile.hometown,
+            contributionCounts: userProfile.contributionCounts,
+        },
     };
 };
 
