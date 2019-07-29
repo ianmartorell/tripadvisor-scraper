@@ -132,8 +132,7 @@ async function callForRestaurantList(locationId, limit = LIMIT, offset = 0) {
         `https://api.tripadvisor.com/api/internal/1.14/location/${locationId}/restaurants?currency=CZK&lang=${global.LANGUAGE}&limit=${limit}&offset=${offset}`,
         { headers: { 'X-TripAdvisor-API-Key': API_KEY }, ...getAgentOptions() },
     );
-    console.log(
-        `https://api.tripadvisor.com/api/internal/1.14/location/${locationId}/hotels?currency=CZK&lang=${global.LANGUAGE}&limit=${limit}&offset=${offset}`);
+    
     return response.data;
 }
 
@@ -143,6 +142,9 @@ async function callForHotelList(locationId, limit = LIMIT, offset = 0) {
         { headers: { 'X-TripAdvisor-API-Key': API_KEY }, ...getAgentOptions() },
     );
 
+    console.log(
+        `https://api.tripadvisor.com/api/internal/1.14/location/${locationId}/hotels?currency=CZK&lang=${global.LANGUAGE}&limit=${limit}&offset=${offset}`);
+    console.log(response.data);
     return response.data;
 }
 
