@@ -207,7 +207,7 @@ async function getClient() {
     return axios.create({
         baseURL: 'https://www.tripadvisor.co.uk/data/graphql',
         headers: {
-            'x-requested-by': getSecurityToken($),
+            // 'x-requested-by': getSecurityToken($),
             Cookie: getCookies(response),
         },
         ...getAgentOptions(),
